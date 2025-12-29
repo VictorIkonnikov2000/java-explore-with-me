@@ -1,4 +1,5 @@
 import lombok.experimental.UtilityClass;
+import ru.practicum.ewm.stats.dto.EndpointHitDto;
 
 @UtilityClass
 public class EndpointHitMapper {

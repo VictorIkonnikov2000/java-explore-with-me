@@ -1,3 +1,5 @@
+package client;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -6,18 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import ru.practicum.ewm.stats.dto.EndpointHitDto;
+import ru.practicum.ewm.stats.dto.ViewStatsDto;
 
 import java.util.Collections;
 import java.util.List;
 
 @Component
-public class StatsClient {
+public class StatsClientImpl implements StatsClient {
 
-    private RestTemplate restTemplate;
-    private String baseUrl;
+    private final RestTemplate restTemplate;
+    private final String baseUrl;
 
-    public void statsClientImpl(
+    public StatsClientImpl(
             RestTemplate restTemplate,
             @Value("${stats.service.url}") String baseUrl
     ) {
@@ -25,15 +28,10 @@ public class StatsClient {
         this.baseUrl = baseUrl;
     }
 
-    public StatsClient(RestTemplate restTemplate, String baseUrl) {
-        this.restTemplate = restTemplate;
-        this.baseUrl = baseUrl;
-    }
-
     /**
      * POST /hit
      */
-
+    @Override
     public void hit(EndpointHitDto endpointHit) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(baseUrl)
@@ -47,7 +45,7 @@ public class StatsClient {
     /**
      * GET /stats
      */
-
+    @Override
     public List<ViewStatsDto> getStats(
             String start,
             String end,
