@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Controller
@@ -33,7 +36,20 @@ public class StatsController {
             @RequestParam(required = false, name = "uris") List<String> uris,
             @RequestParam(defaultValue = "false", required = false, name = "unique") Boolean unique) {
 
-        List<ViewStatsDto> stats = statsService.getStats(start, end, uris, unique);
+        LocalDateTime startTime = parseDateTime(start);
+        LocalDateTime endTime = parseDateTime(end);
+
+        List<ViewStatsDto> stats = statsService.getStats(startTime, endTime, uris, unique);
         return new ResponseEntity<>(stats, HttpStatus.OK);
     }
+
+    private LocalDateTime parseDateTime(String dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        try {
+            return LocalDateTime.parse(dateTime, formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Некорректный формат даты. Ожидается: yyyy-MM-dd HH:mm:ss. Получено: " + dateTime, e);
+        }
+    }
 }
+
