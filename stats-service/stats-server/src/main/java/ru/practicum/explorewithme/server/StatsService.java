@@ -4,8 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.dto.EndpointHitDto;
-import ru.practicum.explorewithme.dto.ViewStatsDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -26,22 +26,22 @@ public class StatsService {
     private final StatsRepository statsRepository;
 
     @Transactional
-    public void saveHit(EndpointHitDto endpointHitDto) {
-        validateEndpointHit(endpointHitDto);
+    public void saveHit(EndpointHit endpointHit) {
+        validateEndpointHit(endpointHit);
 
-        EndpointHit entity = EndpointHit.builder()
-                .app(endpointHitDto.getApp().trim())
-                .uri(endpointHitDto.getUri())
-                .ip(endpointHitDto.getIp())
-                .timestamp(parseDateTime(endpointHitDto.getTimestamp()))
+        EndpointHitEntity entity = EndpointHitEntity.builder()
+                .app(endpointHit.getApp().trim())
+                .uri(endpointHit.getUri())
+                .ip(endpointHit.getIp())
+                .timestamp(parseDateTime(endpointHit.getTimestamp()))
                 .build();
 
         statsRepository.save(entity);
         log.debug("Запрос сохранён: app={}, uri={}", entity.getApp(), entity.getUri());
     }
 
-    public List<ViewStatsDto> getStats(String start, String end,
-                                       List<String> uris, Boolean unique) {
+    public List<ViewStats> getStats(String start, String end,
+                                    List<String> uris, Boolean unique) {
 
         String decodedStart = decodeDateTime(start);
         String decodedEnd = decodeDateTime(end);
@@ -77,14 +77,14 @@ public class StatsService {
         }
     }
 
-    private void validateEndpointHit(EndpointHitDto endpointHitDto) {
-        if (endpointHitDto.getApp() == null || endpointHitDto.getApp().trim().isEmpty()) {
+    private void validateEndpointHit(EndpointHit endpointHit) {
+        if (endpointHit.getApp() == null || endpointHit.getApp().trim().isEmpty()) {
             throw new IllegalArgumentException("Название приложения не может быть пустым");
         }
-        if (endpointHitDto.getUri() == null || endpointHitDto.getUri().isEmpty()) {
+        if (endpointHit.getUri() == null || endpointHit.getUri().isEmpty()) {
             throw new IllegalArgumentException("URI не может быть пустым");
         }
-        if (endpointHitDto.getIp() == null || endpointHitDto.getIp().isEmpty()) {
+        if (endpointHit.getIp() == null || endpointHit.getIp().isEmpty()) {
             throw new IllegalArgumentException("IP не может быть пустым");
         }
     }
@@ -112,15 +112,15 @@ public class StatsService {
         }
     }
 
-    private List<ViewStatsDto> mapToViewStats(List<Object[]> rawResults) {
-        List<ViewStatsDto> viewStatsDtoList = new ArrayList<>();
+    private List<ViewStats> mapToViewStats(List<Object[]> rawResults) {
+        List<ViewStats> viewStatsList = new ArrayList<>();
         for (Object[] row : rawResults) {
-            viewStatsDtoList.add(new ViewStatsDto(
+            viewStatsList.add(new ViewStats(
                     (String) row[0],
                     (String) row[1],
                     (Long) row[2]
             ));
         }
-        return viewStatsDtoList;
+        return viewStatsList;
     }
 }

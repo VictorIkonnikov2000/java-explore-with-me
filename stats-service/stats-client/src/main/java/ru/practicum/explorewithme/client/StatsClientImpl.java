@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.explorewithme.dto.EndpointHitDto;
-import ru.practicum.explorewithme.dto.ViewStatsDto;
+import ru.practicum.explorewithme.dto.EndpointHit;
+import ru.practicum.explorewithme.dto.ViewStats;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -30,21 +30,21 @@ public class StatsClientImpl implements StatsClient {
     private String serverUrl;
 
     @Override
-    public void hit(EndpointHitDto endpointHitDto) {
+    public void hit(EndpointHit endpointHit) {
         try {
-            if (endpointHitDto.getTimestamp() == null) {
-                endpointHitDto.setTimestamp(LocalDateTime.now().format(FORMATTER));
+            if (endpointHit.getTimestamp() == null) {
+                endpointHit.setTimestamp(LocalDateTime.now().format(FORMATTER));
             }
 
             ResponseEntity<Void> response = restTemplate.postForEntity(
                     serverUrl + "/hit",
-                    endpointHitDto,
+                    endpointHit,
                     Void.class
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 log.debug("Запрос сохранён: {} {}, статус: {}",
-                        endpointHitDto.getApp(), endpointHitDto.getUri(), response.getStatusCode());
+                        endpointHit.getApp(), endpointHit.getUri(), response.getStatusCode());
             } else {
                 log.warn("Неудачное сохранение запроса: статус {}", response.getStatusCode());
             }
@@ -54,7 +54,7 @@ public class StatsClientImpl implements StatsClient {
     }
 
     @Override
-    public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+    public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromHttpUrl(serverUrl + "/stats")
@@ -74,9 +74,9 @@ public class StatsClientImpl implements StatsClient {
             String url = builder.encode().toUriString();
             log.debug("Запрос статистики по url: {}", url);
 
-            ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(
+            ResponseEntity<ViewStats[]> response = restTemplate.getForEntity(
                     url,
-                    ViewStatsDto[].class
+                    ViewStats[].class
             );
 
             if (response.getBody() != null) {
@@ -92,8 +92,8 @@ public class StatsClientImpl implements StatsClient {
     }
 
     @Override
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
-                                       List<String> uris, Boolean unique) {
+    public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end,
+                                    List<String> uris, Boolean unique) {
         String startStr = start.format(FORMATTER);
         String endStr = end.format(FORMATTER);
         return getStats(startStr, endStr, uris, unique);
