@@ -29,7 +29,7 @@ public class StatsService {
     public void saveHit(EndpointHitDto endpointHitDto) {
         validateEndpointHit(endpointHitDto);
 
-        EndpointHitEntity entity = EndpointHitEntity.builder()
+        EndpointHit entity = EndpointHit.builder()
                 .app(endpointHitDto.getApp().trim())
                 .uri(endpointHitDto.getUri())
                 .ip(endpointHitDto.getIp())
