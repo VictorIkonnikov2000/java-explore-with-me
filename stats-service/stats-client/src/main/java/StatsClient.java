@@ -17,7 +17,7 @@ public class StatsClient {
     private RestTemplate restTemplate;
     private String baseUrl;
 
-    public void StatsClientImpl(
+    public void statsClientImpl(
             RestTemplate restTemplate,
             @Value("${stats.service.url}") String baseUrl
     ) {
