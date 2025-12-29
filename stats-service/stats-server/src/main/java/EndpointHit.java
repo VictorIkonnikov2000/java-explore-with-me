@@ -1,5 +1,3 @@
-package ru.practicum.explorewithme.server;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EndpointHitEntity {
+public class EndpointHit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

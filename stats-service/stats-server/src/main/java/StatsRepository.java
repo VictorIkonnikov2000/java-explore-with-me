@@ -1,5 +1,3 @@
-package ru.practicum.explorewithme.server;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface StatsRepository extends JpaRepository<EndpointHitEntity, Long> {
+public interface StatsRepository extends JpaRepository<EndpointHitDto, Long> {
 
     @Query("SELECT h.app, h.uri, COUNT(h.ip) " +
             "FROM EndpointHitEntity h " +

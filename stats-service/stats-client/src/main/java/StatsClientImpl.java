@@ -1,5 +1,3 @@
-package ru.practicum.explorewithme.client;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,8 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.explorewithme.dto.EndpointHit;
-import ru.practicum.explorewithme.dto.ViewStats;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +26,7 @@ public class StatsClientImpl implements StatsClient {
     private String serverUrl;
 
     @Override
-    public void hit(EndpointHit endpointHit) {
+    public void hit(EndpointHitDto endpointHit) {
         try {
             if (endpointHit.getTimestamp() == null) {
                 endpointHit.setTimestamp(LocalDateTime.now().format(FORMATTER));

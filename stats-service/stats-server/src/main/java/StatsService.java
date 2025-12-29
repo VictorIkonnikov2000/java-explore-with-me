@@ -1,11 +1,7 @@
-package ru.practicum.explorewithme.server;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.dto.EndpointHit;
-import ru.practicum.explorewithme.dto.ViewStats;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +25,7 @@ public class StatsService {
     public void saveHit(EndpointHit endpointHit) {
         validateEndpointHit(endpointHit);
 
-        EndpointHitEntity entity = EndpointHitEntity.builder()
+        EndpointHitDto entity = EndpointHit.builder()
                 .app(endpointHit.getApp().trim())
                 .uri(endpointHit.getUri())
                 .ip(endpointHit.getIp())
@@ -77,7 +73,7 @@ public class StatsService {
         }
     }
 
-    private void validateEndpointHit(EndpointHit endpointHit) {
+    private void validateEndpointHit(EndpointHitDto endpointHit) {
         if (endpointHit.getApp() == null || endpointHit.getApp().trim().isEmpty()) {
             throw new IllegalArgumentException("Название приложения не может быть пустым");
         }

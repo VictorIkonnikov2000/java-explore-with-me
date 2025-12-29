@@ -1,14 +1,9 @@
-package ru.practicum.explorewithme.client;
-
-import ru.practicum.explorewithme.dto.EndpointHit;
-import ru.practicum.explorewithme.dto.ViewStats;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatsClient {
 
-    void hit(EndpointHit endpointHit);
+    void hit(EndpointHitDto endpointHit);
 
     /**
      * Статистика по посещениям

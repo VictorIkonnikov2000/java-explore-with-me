@@ -1,5 +1,3 @@
-package ru.practicum.explorewithme.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +5,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EndpointHit {
-    private Long id;
+public class ViewStats {
     private String app;
     private String uri;
-    private String ip;
-    private String timestamp;
+    private Long hits;
 }
