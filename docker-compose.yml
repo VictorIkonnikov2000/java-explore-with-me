@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   stats-server:
     build:
@@ -10,7 +9,7 @@ services:
     ports:
       - "9090:9090"
     environment:
-      SPRING_PROFILES_ACTIVE: docker  # Активируем профиль docker
+      SPRING_PROFILES_ACTIVE: docker
   stats-db:
     image: postgres:16.1
     container_name: postgres-ewm-stats-db
@@ -28,4 +27,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: docker # Активируем профиль docker
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - stats-server # Добавлена зависимость от stats-server
+
