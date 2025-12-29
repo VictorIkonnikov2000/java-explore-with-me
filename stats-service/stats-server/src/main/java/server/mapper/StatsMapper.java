@@ -1,7 +1,9 @@
-package server;
+package server.mapper;
 
 import dto.EndpointHitDto;
 import dto.ViewStatsDto;
+import server.model.EndpointHit;
+
 import java.util.List;
 
 public interface StatsMapper {

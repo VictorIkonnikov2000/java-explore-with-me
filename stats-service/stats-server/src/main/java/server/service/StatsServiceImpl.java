@@ -1,4 +1,4 @@
-package server;
+package server.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import dto.EndpointHitDto;
 import dto.ViewStatsDto;
+import server.mapper.StatsMapper;
+import server.model.EndpointHit;
+import server.repository.StatsRepository;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

@@ -1,8 +1,9 @@
-package server;
+package server.mapper;
 
 import dto.EndpointHitDto;
 import dto.ViewStatsDto;
 import org.springframework.stereotype.Component;
+import server.model.EndpointHit;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
