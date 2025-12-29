@@ -28,17 +28,22 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional
     public void saveHit(EndpointHitDto endpointHitDto) {
+        log.info("Получен запрос на сохранение хита: app={}, uri={}, ip={}",
+                endpointHitDto.getApp(), endpointHitDto.getUri(), endpointHitDto.getIp());
+
         validateEndpointHit(endpointHitDto);
 
         EndpointHit entity = statsMapper.toEntity(endpointHitDto);
-
         statsRepository.save(entity);
-        log.debug("Запрос сохранён: app={}, uri={}", entity.getApp(), entity.getUri());
+
+        log.info("Хит успешно сохранен с ID: {}", entity.getId());
     }
 
     @Override
     public List<ViewStatsDto> getStats(String start, String end,
                                        List<String> uris, Boolean unique) {
+        log.info("Запрос статистики: start={}, end={}, uris={}, unique={}",
+                start, end, uris, unique);
 
         String decodedStart = decodeDateTime(start);
         String decodedEnd = decodeDateTime(end);
@@ -50,12 +55,17 @@ public class StatsServiceImpl implements StatsService {
 
         List<Object[]> rawResults;
         if (Boolean.TRUE.equals(unique)) {
+            log.debug("Выборка уникальной статистики");
             rawResults = getUniqueStats(startTime, endTime, uris);
         } else {
+            log.debug("Выборка общей статистики");
             rawResults = getAllStats(startTime, endTime, uris);
         }
 
-        return statsMapper.toViewStatsDtoList(rawResults);
+        List<ViewStatsDto> results = statsMapper.toViewStatsDtoList(rawResults);
+        log.info("Статистика успешно получена, количество записей: {}", results.size());
+
+        return results;
     }
 
     private List<Object[]> getUniqueStats(LocalDateTime start, LocalDateTime end, List<String> uris) {
@@ -76,18 +86,22 @@ public class StatsServiceImpl implements StatsService {
 
     private void validateEndpointHit(EndpointHitDto endpointHitDto) {
         if (endpointHitDto.getApp() == null || endpointHitDto.getApp().trim().isEmpty()) {
+            log.warn("Валидация провалена: пустое название приложения");
             throw new IllegalArgumentException("Название приложения не может быть пустым");
         }
         if (endpointHitDto.getUri() == null || endpointHitDto.getUri().isEmpty()) {
+            log.warn("Валидация провалена: пустой URI");
             throw new IllegalArgumentException("URI не может быть пустым");
         }
         if (endpointHitDto.getIp() == null || endpointHitDto.getIp().isEmpty()) {
+            log.warn("Валидация провалена: пустой IP");
             throw new IllegalArgumentException("IP не может быть пустым");
         }
     }
 
     private void validateTimeRange(LocalDateTime start, LocalDateTime end) {
         if (start.isAfter(end)) {
+            log.warn("Ошибка валидации времени: start {} после end {}", start, end);
             throw new IllegalArgumentException("Время начала должно быть раньше времени окончания");
         }
     }
@@ -96,6 +110,7 @@ public class StatsServiceImpl implements StatsService {
         try {
             return URLDecoder.decode(dateTime, StandardCharsets.UTF_8);
         } catch (Exception e) {
+            log.error("Ошибка декодирования даты: {}", dateTime);
             return dateTime;
         }
     }
@@ -104,9 +119,11 @@ public class StatsServiceImpl implements StatsService {
         try {
             return LocalDateTime.parse(dateTime, FORMATTER);
         } catch (DateTimeParseException e) {
+            log.error("Ошибка парсинга даты: {}. Ожидаемый формат: yyyy-MM-dd HH:mm:ss", dateTime);
             throw new IllegalArgumentException(
                     "Некорректный формат даты. Ожидается: yyyy-MM-dd HH:mm:ss. Получено: " + dateTime, e);
         }
     }
 }
+
 
