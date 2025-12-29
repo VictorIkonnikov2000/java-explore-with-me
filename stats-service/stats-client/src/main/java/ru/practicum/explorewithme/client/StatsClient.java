@@ -10,14 +10,6 @@ public interface StatsClient {
 
     void hit(EndpointHitDto endpointHitDto);
 
-    /**
-     * Статистика по посещениям
-     * @param start дата и время начала диапазона
-     * @param end дата и время конца диапазона
-     * @param uris список URI для фильтрации
-     * @param unique учитывать только уникальные посещения
-     * @return список статистики
-     */
     List<ViewStatsDto> getStats(String start, String end,
                                 List<String> uris, Boolean unique);
 
