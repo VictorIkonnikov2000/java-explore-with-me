@@ -16,7 +16,7 @@ services:
 
   stats-server:
     build:
-      context: ./stats-module/stats-server
+      context: ./stats-service/stats-server
       dockerfile: Dockerfile
     container_name: stats-server
     environment:
