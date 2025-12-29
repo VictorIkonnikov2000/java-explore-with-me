@@ -1,32 +1,39 @@
 package server;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import dto.EndpointHitDto;
 import dto.ViewStatsDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequiredArgsConstructor
+@Controller
 public class StatsController {
+
     private final StatsService statsService;
 
-    @PostMapping("/hit")
-    public ResponseEntity<Object> hit(@RequestBody EndpointHitDto endpointHitDto) {
+    @Autowired
+    public StatsController(StatsService statsService) {
+        this.statsService = statsService;
+    }
+
+    @RequestMapping(value = "/hit", method = RequestMethod.POST)
+    public ResponseEntity<Void> hit(@RequestBody EndpointHitDto endpointHitDto) {
         statsService.saveHit(endpointHitDto);
-        return ResponseEntity.status(201).build();
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/stats")
     public ResponseEntity<List<ViewStatsDto>> getStats(
             @RequestParam String start,
             @RequestParam String end,
-            @RequestParam(required = false) List<String> uris,
-            @RequestParam(defaultValue = "false") Boolean unique) {
+            @RequestParam(required = false, name = "uris") List<String> uris,
+            @RequestParam(defaultValue = "false", required = false, name = "unique") Boolean unique) {
 
         List<ViewStatsDto> stats = statsService.getStats(start, end, uris, unique);
-        return ResponseEntity.ok(stats);
+        return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 }
