@@ -31,32 +31,36 @@ public class StatsClient {
     @Value("${stats-server.url:http://localhost:9090}")
     private String serverUrl;
 
-
     public void hit(EndpointHitDto endpointHitDto) {
+        log.info("Отправка данных о просмотре: app={}, uri={}, ip={}",
+                endpointHitDto.getApp(), endpointHitDto.getUri(), endpointHitDto.getIp());
+
         try {
             if (endpointHitDto.getTimestamp() == null) {
                 endpointHitDto.setTimestamp(LocalDateTime.now().format(FORMATTER));
             }
 
+            String url = serverUrl + "/hit";
             ResponseEntity<Void> response = restTemplate.postForEntity(
-                    serverUrl + "/hit",
+                    url,
                     endpointHitDto,
                     Void.class
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.debug("Запрос сохранён: {} {}, статус: {}",
-                        endpointHitDto.getApp(), endpointHitDto.getUri(), response.getStatusCode());
+                log.info("Данные успешно отправлены. Статус: {}", response.getStatusCode());
             } else {
-                log.warn("Неудачное сохранение запроса: статус {}", response.getStatusCode());
+                log.warn("Сервер статистики вернул ошибку при сохранении: статус {}", response.getStatusCode());
             }
         } catch (Exception e) {
-            log.error("Ошибка при сохранении запроса: {}", e.getMessage(), e);
+            log.error("Критическая ошибка при обращении к серверу статистики (POST /hit): {}", e.getMessage());
         }
     }
 
-
     public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+        log.info("Запрос статистики с сервера: start={}, end={}, uris={}, unique={}",
+                start, end, uris, unique);
+
         try {
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromHttpUrl(serverUrl + "/stats")
@@ -74,7 +78,7 @@ public class StatsClient {
             }
 
             String url = builder.encode().toUriString();
-            log.debug("Запрос статистики по url: {}", url);
+            log.debug("Сформированный URL для запроса статистики: {}", url);
 
             ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(
                     url,
@@ -82,23 +86,22 @@ public class StatsClient {
             );
 
             if (response.getBody() != null) {
-                log.debug("Получено {} записей статистики", response.getBody().length);
+                log.info("Статистика получена успешно. Количество записей: {}", response.getBody().length);
                 return Arrays.asList(response.getBody());
             }
+
+            log.info("Сервер вернул пустой результат статистики");
             return Collections.emptyList();
 
         } catch (Exception e) {
-            log.error("Ошибка при получении статистики: {}", e.getMessage(), e);
+            log.error("Критическая ошибка при получении статистики (GET /stats): {}", e.getMessage());
             return Collections.emptyList();
         }
     }
 
-
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
                                        List<String> uris, Boolean unique) {
-        String startStr = start.format(FORMATTER);
-        String endStr = end.format(FORMATTER);
-        return getStats(startStr, endStr, uris, unique);
+        return getStats(start.format(FORMATTER), end.format(FORMATTER), uris, unique);
     }
 
     private String encodeDateTime(String dateTime) {
@@ -106,7 +109,7 @@ public class StatsClient {
             return URLEncoder.encode(dateTime, StandardCharsets.UTF_8)
                     .replace("+", "%20");
         } catch (Exception e) {
-            log.error("Ошибка при кодировании даты: {}", dateTime, e);
+            log.error("Ошибка кодирования даты/времени '{}': {}", dateTime, e.getMessage());
             return dateTime;
         }
     }
