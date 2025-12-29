@@ -1,7 +1,6 @@
 package server;
 
 import dto.EndpointHitDto;
-import server.EndpointHit;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
