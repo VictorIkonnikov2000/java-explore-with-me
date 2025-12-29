@@ -1,3 +1,5 @@
+package ru.practicum.explorewithme.server;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
