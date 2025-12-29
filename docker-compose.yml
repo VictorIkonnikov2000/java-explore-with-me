@@ -1,8 +1,9 @@
+version: "3.8"
 services:
   stats-server:
     build:
-      context: .
-      dockerfile: stats-service/stats-server/Dockerfile
+      context: ./stats-service/stats-server
+      dockerfile: Dockerfile # Укоротили путь, т.к. Dockerfile теперь в context
     container_name: stats-server
     depends_on:
       - stats-db
@@ -21,8 +22,8 @@ services:
       POSTGRES_PASSWORD: stats
   ewm-service:
     build:
-      context: .
-      dockerfile: main-service/Dockerfile
+      context: ./main-service
+      dockerfile: Dockerfile # Укоротили путь, т.к. Dockerfile теперь в context
     container_name: ewm-server
     ports:
       - "8080:8080"
