@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,18 +23,14 @@ public class StatsServiceImpl implements StatsService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final StatsRepository statsRepository;
+    private final StatsMapper statsMapper;
 
     @Override
     @Transactional
     public void saveHit(EndpointHitDto endpointHitDto) {
         validateEndpointHit(endpointHitDto);
 
-        EndpointHit entity = EndpointHit.builder()
-                .app(endpointHitDto.getApp().trim())
-                .uri(endpointHitDto.getUri())
-                .ip(endpointHitDto.getIp())
-                .timestamp(parseDateTime(endpointHitDto.getTimestamp()))
-                .build();
+        EndpointHit entity = statsMapper.toEntity(endpointHitDto);
 
         statsRepository.save(entity);
         log.debug("Запрос сохранён: app={}, uri={}", entity.getApp(), entity.getUri());
@@ -60,7 +55,7 @@ public class StatsServiceImpl implements StatsService {
             rawResults = getAllStats(startTime, endTime, uris);
         }
 
-        return mapToViewStats(rawResults);
+        return statsMapper.toViewStatsDtoList(rawResults);
     }
 
     private List<Object[]> getUniqueStats(LocalDateTime start, LocalDateTime end, List<String> uris) {
@@ -113,16 +108,5 @@ public class StatsServiceImpl implements StatsService {
                     "Некорректный формат даты. Ожидается: yyyy-MM-dd HH:mm:ss. Получено: " + dateTime, e);
         }
     }
-
-    private List<ViewStatsDto> mapToViewStats(List<Object[]> rawResults) {
-        List<ViewStatsDto> viewStatsDtoList = new ArrayList<>();
-        for (Object[] row : rawResults) {
-            viewStatsDtoList.add(new ViewStatsDto(
-                    (String) row[0],
-                    (String) row[1],
-                    (Long) row[2]
-            ));
-        }
-        return viewStatsDtoList;
-    }
 }
+
