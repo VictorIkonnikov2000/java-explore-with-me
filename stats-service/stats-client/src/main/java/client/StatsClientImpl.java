@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.client;
+package client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.explorewithme.dto.EndpointHitDto;
-import ru.practicum.explorewithme.dto.ViewStatsDto;
+import dto.EndpointHitDto;
+import dto.ViewStatsDto;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

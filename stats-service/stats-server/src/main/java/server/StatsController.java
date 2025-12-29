@@ -1,10 +1,10 @@
-package ru.practicum.explorewithme.server;
+package server;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.dto.EndpointHitDto;
-import ru.practicum.explorewithme.dto.ViewStatsDto;
+import dto.EndpointHitDto;
+import dto.ViewStatsDto;
 
 import java.util.List;
 

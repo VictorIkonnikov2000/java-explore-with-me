@@ -1,11 +1,11 @@
-package ru.practicum.explorewithme.server;
+package server;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.dto.EndpointHitDto;
-import ru.practicum.explorewithme.dto.ViewStatsDto;
+import dto.EndpointHitDto;
+import dto.ViewStatsDto;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.server;
+package server;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

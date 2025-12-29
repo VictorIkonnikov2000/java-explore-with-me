@@ -1,7 +1,7 @@
-package ru.practicum.explorewithme.client;
+package client;
 
-import ru.practicum.explorewithme.dto.EndpointHitDto;
-import ru.practicum.explorewithme.dto.ViewStatsDto;
+import dto.EndpointHitDto;
+import dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

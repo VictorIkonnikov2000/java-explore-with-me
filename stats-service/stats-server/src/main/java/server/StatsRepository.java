@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.server;
+package server;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
