@@ -11,47 +11,34 @@ import java.util.List;
 @Repository
 public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
 
-    @Query("SELECT h.app, h.uri, COUNT(h.ip) " +
+    // Общая функция для запросов статистики (обычной и уникальной)
+    @Query("SELECT h.app, h.uri, COUNT(:distinctClause h.ip) " +
             "FROM EndpointHit h " +
             "WHERE h.timestamp BETWEEN :start AND :end " +
-            "AND h.uri IN :uris " +
+            "AND (:uris IS NULL OR h.uri IN :uris) " +
             "GROUP BY h.app, h.uri " +
-            "ORDER BY COUNT(h.ip) DESC")
-    List<Object[]> findStatsByUris(
+            "ORDER BY COUNT(:distinctClause h.ip) DESC")
+    List<Object[]> findStats(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
-            @Param("uris") List<String> uris
+            @Param("uris") List<String> uris,
+            @Param("distinctClause") String distinctClause  // "DISTINCT" или ""
     );
 
-    @Query("SELECT h.app, h.uri, COUNT(h.ip) " +
-            "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN :start AND :end " +
-            "GROUP BY h.app, h.uri " +
-            "ORDER BY COUNT(h.ip) DESC")
-    List<Object[]> findStatsAll(
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end
-    );
 
-    @Query("SELECT h.app, h.uri, COUNT(DISTINCT h.ip) " +
-            "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN :start AND :end " +
-            "AND h.uri IN :uris " +
-            "GROUP BY h.app, h.uri " +
-            "ORDER BY COUNT(DISTINCT h.ip) DESC")
-    List<Object[]> findUniqueStatsByUris(
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
-            @Param("uris") List<String> uris
-    );
+    default List<Object[]> findStatsAll(LocalDateTime start, LocalDateTime end) {
+        return findStats(start, end, null, "");  // Без uris и без DISTINCT
+    }
 
-    @Query("SELECT h.app, h.uri, COUNT(DISTINCT h.ip) " +
-            "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN :start AND :end " +
-            "GROUP BY h.app, h.uri " +
-            "ORDER BY COUNT(DISTINCT h.ip) DESC")
-    List<Object[]> findUniqueStatsAll(
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end
-    );
+    default List<Object[]> findStatsByUris(LocalDateTime start, LocalDateTime end, List<String> uris) {
+        return findStats(start, end, uris, "");   // С uris, но без DISTINCT
+    }
+
+    default List<Object[]> findUniqueStatsAll(LocalDateTime start, LocalDateTime end) {
+        return findStats(start, end, null, "DISTINCT");  // Без uris, но с DISTINCT
+    }
+
+    default List<Object[]> findUniqueStatsByUris(LocalDateTime start, LocalDateTime end, List<String> uris) {
+        return findStats(start, end, uris, "DISTINCT");   // С uris и с DISTINCT
+    }
 }
