@@ -26,7 +26,7 @@ public class StatsClientImpl implements StatsClient {
     private String serverUrl;
 
     @Override
-    public void hit(EndpointHitDto endpointHit) {
+    public void hit(EndpointHit endpointHit) {
         try {
             if (endpointHit.getTimestamp() == null) {
                 endpointHit.setTimestamp(LocalDateTime.now().format(FORMATTER));

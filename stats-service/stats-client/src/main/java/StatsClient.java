@@ -3,7 +3,7 @@ import java.util.List;
 
 public interface StatsClient {
 
-    void hit(EndpointHitDto endpointHit);
+    void hit(EndpointHit endpointHit);
 
     /**
      * Статистика по посещениям

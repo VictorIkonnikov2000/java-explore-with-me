@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface StatsRepository extends JpaRepository<EndpointHitDto, Long> {
+public interface StatsRepository extends JpaRepository<EndpointHitEntity, Long> {
 
     @Query("SELECT h.app, h.uri, COUNT(h.ip) " +
             "FROM EndpointHitEntity h " +

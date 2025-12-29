@@ -25,7 +25,7 @@ public class StatsService {
     public void saveHit(EndpointHit endpointHit) {
         validateEndpointHit(endpointHit);
 
-        EndpointHitDto entity = EndpointHit.builder()
+        EndpointHitEntity entity = EndpointHitEntity.builder()
                 .app(endpointHit.getApp().trim())
                 .uri(endpointHit.getUri())
                 .ip(endpointHit.getIp())
@@ -73,7 +73,7 @@ public class StatsService {
         }
     }
 
-    private void validateEndpointHit(EndpointHitDto endpointHit) {
+    private void validateEndpointHit(EndpointHit endpointHit) {
         if (endpointHit.getApp() == null || endpointHit.getApp().trim().isEmpty()) {
             throw new IllegalArgumentException("Название приложения не может быть пустым");
         }

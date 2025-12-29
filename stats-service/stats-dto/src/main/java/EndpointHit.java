@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EndpointHitDto {
+public class EndpointHit {
     private Long id;
     private String app;
     private String uri;
