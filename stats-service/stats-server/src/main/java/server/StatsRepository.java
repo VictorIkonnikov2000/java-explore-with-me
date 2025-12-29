@@ -11,16 +11,47 @@ import java.util.List;
 @Repository
 public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
 
-    @Query("SELECT h.app, h.uri, COUNT(CASE WHEN :unique = TRUE THEN DISTINCT h.ip ELSE h.ip END) " +
+    @Query("SELECT h.app, h.uri, COUNT(h.ip) " +
             "FROM EndpointHit h " +
             "WHERE h.timestamp BETWEEN :start AND :end " +
-            ("AND h.uri IN :uris ") +
+            "AND h.uri IN :uris " +
             "GROUP BY h.app, h.uri " +
-            "ORDER BY COUNT(CASE WHEN :unique = TRUE THEN DISTINCT h.ip ELSE h.ip END) DESC")
-    List<Object[]> findStats(
+            "ORDER BY COUNT(h.ip) DESC")
+    List<Object[]> findStatsByUris(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
-            @Param("uris") List<String> uris,
-            @Param("unique") Boolean unique
+            @Param("uris") List<String> uris
+    );
+
+    @Query("SELECT h.app, h.uri, COUNT(h.ip) " +
+            "FROM EndpointHit h " +
+            "WHERE h.timestamp BETWEEN :start AND :end " +
+            "GROUP BY h.app, h.uri " +
+            "ORDER BY COUNT(h.ip) DESC")
+    List<Object[]> findStatsAll(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("SELECT h.app, h.uri, COUNT(DISTINCT h.ip) " +
+            "FROM EndpointHit h " +
+            "WHERE h.timestamp BETWEEN :start AND :end " +
+            "AND h.uri IN :uris " +
+            "GROUP BY h.app, h.uri " +
+            "ORDER BY COUNT(DISTINCT h.ip) DESC")
+    List<Object[]> findUniqueStatsByUris(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("uris") List<String> uris
+    );
+
+    @Query("SELECT h.app, h.uri, COUNT(DISTINCT h.ip) " +
+            "FROM EndpointHit h " +
+            "WHERE h.timestamp BETWEEN :start AND :end " +
+            "GROUP BY h.app, h.uri " +
+            "ORDER BY COUNT(DISTINCT h.ip) DESC")
+    List<Object[]> findUniqueStatsAll(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
 }
