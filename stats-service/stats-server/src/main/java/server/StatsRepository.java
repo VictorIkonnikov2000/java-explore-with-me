@@ -14,7 +14,7 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
     @Query("SELECT h.app, h.uri, COUNT(CASE WHEN :unique = TRUE THEN DISTINCT h.ip ELSE h.ip END) " +
             "FROM EndpointHit h " +
             "WHERE h.timestamp BETWEEN :start AND :end " +
-            ( "AND h.uri IN :uris " )+
+            ("AND h.uri IN :uris ") +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(CASE WHEN :unique = TRUE THEN DISTINCT h.ip ELSE h.ip END) DESC")
     List<Object[]> findStats(
