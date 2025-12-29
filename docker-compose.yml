@@ -4,8 +4,8 @@ services:
     container_name: stats-db
     environment:
       POSTGRES_DB: stats_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: stats
+      POSTGRES_PASSWORD: stats
     ports:
       - "5433:5432"
     healthcheck:
