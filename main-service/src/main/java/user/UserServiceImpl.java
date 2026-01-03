@@ -1,7 +1,5 @@
 package user;
 
-
-
 import user.dto.NewUserRequest;
 import user.dto.UserDto;
 import exception.UserNotFoundException;
