@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static ru.practicum.constant.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @Component
 @Slf4j
