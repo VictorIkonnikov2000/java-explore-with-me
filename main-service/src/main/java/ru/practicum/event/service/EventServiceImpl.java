@@ -215,14 +215,14 @@ public class EventServiceImpl implements EventService {
 
         String uri = EVENT + eventId;
 
-        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+        EndpointHitDto requestHitDto = EndpointHitDto.builder()
                 .app("ewm-main-service")
                 .uri(uri)
                 .ip(servletRequest.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(endpointHitDto);
+        statsClient.createHit(requestHitDto);
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
@@ -250,14 +250,14 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = repository.findByParametersForPublicController(text, categoryId, dataTime,
                 rangeEnd, paid, onlyAvailable, pageable);
 
-        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+        EndpointHitDto requestHitDto = EndpointHitDto.builder()
                 .app("ewm-main-service")
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(endpointHitDto);
+        statsClient.createHit(requestHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {
