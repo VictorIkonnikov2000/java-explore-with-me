@@ -12,7 +12,7 @@ import ru.practicum.service.StatsService;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.constant.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @RestController
 @RequiredArgsConstructor
