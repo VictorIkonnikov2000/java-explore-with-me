@@ -222,7 +222,7 @@ public class EventServiceImpl implements EventService {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(endpointHitDto);
+        statsClient.hit(endpointHitDto);
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
@@ -257,7 +257,7 @@ public class EventServiceImpl implements EventService {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(endpointHitDto);
+        statsClient.hit(endpointHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {

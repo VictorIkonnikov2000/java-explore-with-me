@@ -31,7 +31,7 @@ public class StatsClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public void createHit(EndpointHitDto endpointHitDto) {
+    public void hit(EndpointHitDto endpointHitDto) {
         String url = serverUrl + "/hit";
 
         log.info("Отправка хита на {}: {}", url, endpointHitDto);
