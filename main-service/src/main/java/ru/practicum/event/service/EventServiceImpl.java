@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.model.Category;
 import ru.practicum.client.StatsClient;
-import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.StatDto;
 import ru.practicum.error.exceptions.*;
 import ru.practicum.event.repository.EventRepository;
@@ -215,14 +215,14 @@ public class EventServiceImpl implements EventService {
 
         String uri = EVENT + eventId;
 
-        RequestHitDto requestHitDto = RequestHitDto.builder()
+        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("ewm-main-service")
                 .uri(uri)
                 .ip(servletRequest.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(requestHitDto);
+        statsClient.createHit(endpointHitDto);
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
@@ -250,14 +250,14 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = repository.findByParametersForPublicController(text, categoryId, dataTime,
                 rangeEnd, paid, onlyAvailable, pageable);
 
-        RequestHitDto requestHitDto = RequestHitDto.builder()
+        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("ewm-main-service")
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(requestHitDto);
+        statsClient.createHit(endpointHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {

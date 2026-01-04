@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.StatDto;
 
 import java.time.LocalDateTime;
@@ -31,12 +31,12 @@ public class StatsClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public void createHit(RequestHitDto requestHitDto) {
+    public void createHit(EndpointHitDto endpointHitDto) {
         String url = serverUrl + "/hit";
 
-        log.info("Отправка хита на {}: {}", url, requestHitDto);
+        log.info("Отправка хита на {}: {}", url, endpointHitDto);
 
-        HttpEntity<RequestHitDto> request = new HttpEntity<>(requestHitDto, defaultHeaders());
+        HttpEntity<EndpointHitDto> request = new HttpEntity<>(endpointHitDto, defaultHeaders());
 
         try {
             ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
