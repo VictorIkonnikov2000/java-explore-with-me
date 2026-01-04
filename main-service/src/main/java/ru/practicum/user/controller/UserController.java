@@ -22,14 +22,14 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@RequestBody @Valid NewUserRequest request) {
-        return userService.saveUser(request);
+        return userService.addUser(request);
     }
 
     @GetMapping
     public Collection<UserDto> getUsers(@RequestParam(required = false) Collection<Long> ids,
                                         @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                         @RequestParam(defaultValue = "10") @Min(1) Integer size) {
-        return userService.getUsers(ids, from, size);
+        return userService.getAllUsers(ids, from, size);
     }
 
     @DeleteMapping("/{userId}")

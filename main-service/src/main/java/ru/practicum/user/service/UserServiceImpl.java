@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public UserDto saveUser(NewUserRequest request) {
+    public UserDto addUser(NewUserRequest request) {
 
         if (request == null) {
             throw new BadRequestException("Запрос на добавление нового пользователя не может быть null");
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<UserDto> getUsers(Collection<Long> ids, int from, int size) {
+    public Collection<UserDto> getAllUsers(Collection<Long> ids, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         Page<User> usersPage;
 

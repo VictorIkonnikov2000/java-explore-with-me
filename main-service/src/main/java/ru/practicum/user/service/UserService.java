@@ -5,9 +5,9 @@ import ru.practicum.user.dto.UserDto;
 import java.util.Collection;
 
 public interface UserService {
-    UserDto saveUser(NewUserRequest request);
+    UserDto addUser(NewUserRequest request);
 
-    Collection<UserDto> getUsers(Collection<Long> ids, int from, int size);
+    Collection<UserDto> getAllUsers(Collection<Long> ids, int from, int size);
 
     void deleteUser(Long id);
 }
