@@ -1,18 +1,39 @@
 package ru.practicum.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ViewStatsDto {
-    @NotBlank(message = "Идентификатор сервиса не может быть пустым")
     private String app;
-    @NotBlank(message = "URI не может быть пустым")
     private String uri;
-    @PositiveOrZero(message = "Количество просмотров не может быть отрицательным")
     private Long hits;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ViewStatsDto that = (ViewStatsDto) o;
+        return Objects.equals(app, that.app) &&
+                Objects.equals(uri, that.uri) &&
+                Objects.equals(hits, that.hits);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(app, uri, hits);
+    }
+
+    @Override
+    public String toString() {
+        return "ViewStatsDto{" +
+                "app='" + app + '\'' +
+                ", uri='" + uri + '\'' +
+                ", hits=" + hits +
+                '}';
+    }
 }
