@@ -17,7 +17,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class StatClient {
+public class StatsClient {
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -27,7 +27,7 @@ public class StatClient {
     @Value("${stats-server.url:http://localhost:9090}")
     private String serverUrl;
 
-    public StatClient() {
+    public StatsClient() {
         this.restTemplate = new RestTemplate();
     }
 
