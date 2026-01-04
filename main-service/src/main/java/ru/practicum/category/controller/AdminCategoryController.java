@@ -11,13 +11,13 @@ import ru.practicum.category.service.CategoryService;
 @RestController
 @RequestMapping(path = "/admin/categories")
 @RequiredArgsConstructor
-public class CategoryAdminController {
+public class AdminCategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDto create(@RequestBody @Valid NewCategoryDto request) {
-        return categoryService.saveCategory(request);
+        return categoryService.addCategory(request);
     }
 
     @PatchMapping("/{catId}")

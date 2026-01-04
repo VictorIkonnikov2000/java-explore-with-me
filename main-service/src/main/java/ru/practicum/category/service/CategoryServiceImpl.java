@@ -30,16 +30,16 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
-    public CategoryDto saveCategory(NewCategoryDto request) {
+    public CategoryDto addCategory(NewCategoryDto request) {
 
         if (request == null) {
             throw new BadRequestException("Запрос на добавление новой категории не может быть null");
         }
 
         isContainsCategoryByName(request.getName());
-        Category category = categoryMapper.mapToCategory(request);
+        Category category = categoryMapper.toCategory(request);
         Category categorySave = repository.save(category);
-        return categoryMapper.mapToCategoryDto(categorySave);
+        return categoryMapper.toCategoryDto(categorySave);
     }
 
     @Override
@@ -63,24 +63,24 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = isContainsCategory(catId);
 
         if (category.getName().equals(request.getName())) {
-            return categoryMapper.mapToCategoryDto(category);
+            return categoryMapper.toCategoryDto(category);
         }
 
         isContainsCategoryByName(request.getName());
         category.setName(request.getName());
-        return categoryMapper.mapToCategoryDto(category);
+        return categoryMapper.toCategoryDto(category);
     }
 
     @Override
     @Transactional(readOnly = true)
     public CategoryDto getCategoryById(Long catId) {
         Category category = isContainsCategory(catId);
-        return categoryMapper.mapToCategoryDto(category);
+        return categoryMapper.toCategoryDto(category);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<CategoryDto> getCategories(int from, int size) {
+    public Collection<CategoryDto> getAllCategories(int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         Page<Category> categoryPage = repository.findAll(pageable);
         List<Category> categoryList = categoryPage.getContent();

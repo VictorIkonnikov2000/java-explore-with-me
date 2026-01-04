@@ -13,7 +13,7 @@ import java.util.Collection;
 @RequestMapping(path = "/categories")
 @RequiredArgsConstructor
 @Validated
-public class CategoryController {
+public class PublicCategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/{catId}")
@@ -25,6 +25,6 @@ public class CategoryController {
     public Collection<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @Min(0) Integer from,
                                                  @RequestParam(defaultValue = "10") @Min(1) Integer size) {
 
-        return categoryService.getCategories(from, size);
+        return categoryService.getAllCategories(from, size);
     }
 }
