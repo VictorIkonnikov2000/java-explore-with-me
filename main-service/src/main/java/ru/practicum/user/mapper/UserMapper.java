@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
 
-    public UserDto mapToUserDto(User user) {
+    public UserDto toUserDto(User user) {
         if (user == null) {
             return null;
         }
@@ -24,7 +24,7 @@ public class UserMapper {
                 .build();
     }
 
-    public UserShortDto mapToUserShortDto(User user) {
+    public UserShortDto toUserShortDto(User user) {
         if (user == null) {
             return null;
         }
@@ -34,7 +34,7 @@ public class UserMapper {
                 .build();
     }
 
-    public User mapToUser(NewUserRequest request) {
+    public User toUser(NewUserRequest request) {
         if (request == null) {
             return null;
         }
@@ -49,7 +49,7 @@ public class UserMapper {
             return new ArrayList<>();
         }
         return users.stream()
-                .map(this::mapToUserDto)
+                .map(this::toUserDto)
                 .collect(Collectors.toList());
     }
 }

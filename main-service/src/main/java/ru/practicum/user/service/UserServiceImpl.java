@@ -35,9 +35,9 @@ public class UserServiceImpl implements UserService {
         }
 
         isContainsEmail(request.getEmail());
-        User user = userMapper.mapToUser(request);
+        User user = userMapper.toUser(request);
         repository.save(user);
-        return userMapper.mapToUserDto(user);
+        return userMapper.toUserDto(user);
     }
 
     @Override
