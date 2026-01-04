@@ -1,42 +1,18 @@
 package category;
 
-
-
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import category.dto.CategoryDto;
 import category.dto.NewCategoryDto;
-import org.springframework.stereotype.Component;
 
-@Component
-public class CategoryMapper {
+import java.util.List;
 
-    public CategoryDto toCategoryDto(Category category) {
-        if (category == null) {
-            return null;
-        }
+@Mapper(componentModel = "spring")
+public interface CategoryMapper {
+    CategoryDto mapToCategoryDto(Category category);
 
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(category.getId());
-        categoryDto.setName(category.getName());
-        return categoryDto;
-    }
+    @Mapping(target = "id", ignore = true)
+    Category mapToCategory(NewCategoryDto request);
 
-    public Category toCategory(NewCategoryDto newCategoryDto) {
-        if (newCategoryDto == null) {
-            return null;
-        }
-
-        Category category = new Category();
-        category.setName(newCategoryDto.getName());
-        return category;
-    }
-
-    public void updateCategoryFromDto(CategoryDto categoryDto, Category category) {
-        if (categoryDto == null) {
-            return;
-        }
-
-        if (categoryDto.getName() != null) {
-            category.setName(categoryDto.getName());
-        }
-    }
+    List<CategoryDto> toCategoryDtoList(List<Category> categoryList);
 }

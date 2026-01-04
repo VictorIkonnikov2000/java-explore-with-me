@@ -1,15 +1,15 @@
 package user.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
+@Setter
+@Getter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserShortDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     private String name;
 }
-

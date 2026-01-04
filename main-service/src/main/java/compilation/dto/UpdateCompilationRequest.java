@@ -1,23 +1,21 @@
 package compilation.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Size;
+import lombok.*;
+
 import java.util.List;
 
+@Builder
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class UpdateCompilationRequest {
-
-    @Size(min = 1, max = 50)
-    private String title;
-
-    private String description;
-
+    @Nullable
+    private List<Long> events;
+    @Nullable
     private Boolean pinned;
-
-    private List<Long> events; // List of event IDs to replace existing ones
+    @Nullable
+    @Size(min = 1, max = 50, message = "Длина заголовка должна быть от 1 до 50 символов")
+    private String title;
 }

@@ -1,20 +1,18 @@
 package category;
 
-
-
 import category.dto.CategoryDto;
 import category.dto.NewCategoryDto;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface CategoryService {
-    CategoryDto addCategory(NewCategoryDto newCategoryDto);
+    CategoryDto saveCategory(NewCategoryDto request);
+
+    CategoryDto updateCategory(Long catId, NewCategoryDto request);
 
     void deleteCategory(Long catId);
 
-    CategoryDto updateCategory(Long catId, CategoryDto categoryDto);
-
-    List<CategoryDto> getAllCategories();
-
     CategoryDto getCategoryById(Long catId);
+
+    Collection<CategoryDto> getCategories(int from, int size);
 }

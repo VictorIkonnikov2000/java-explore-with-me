@@ -1,74 +1,53 @@
 package event;
 
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import jakarta.persistence.*;
-import user.User;
+import lombok.*;
 import category.Category;
+import user.User;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "events")
-@Data
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "events")
 public class Event {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, length = 2000)
+    @Column(name = "annotation", nullable = false, length = 2000)
     private String annotation;
-
-    @ManyToOne
+    @Column(name = "description", nullable = false, length = 7000)
+    private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User initiator;
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
-    @Column(name = "confirmed_requests")
-    private Integer confirmedRequests;
-
     @Column(name = "created_on", nullable = false)
     private LocalDateTime createdOn;
-
-    @Column(nullable = false, length = 7000)
-    private String description;
-
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
-
-    @ManyToOne
-    @JoinColumn(name = "initiator_id", nullable = false)
-    private User initiator;
-
-    @Column(nullable = false)
-    private Float lat;
-
-    @Column(nullable = false)
-    private Float lon;
-
-    @Column(nullable = false)
-    private Boolean paid;
-
-    @Column(name = "participant_limit")
-    private Integer participantLimit;
-
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
-
-    @Column(name = "request_moderation")
+    @Embedded
+    private Location location;
+    @Column(name = "paid", nullable = false)
+    private Boolean paid;
+    @Column(name = "request_moderation", nullable = false)
     private Boolean requestModeration;
-
-    @Column(nullable = false, length = 50)
-    private String state;
-
-    @Column(nullable = false, length = 255)
+    @Column(name = "participant_limit", nullable = false)
+    private Integer participantLimit;
+    @Column(name = "confirmed_requests")
+    private Long confirmedRequests;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_state", nullable = false)
+    private EventState eventState;
+    @Column(name = "title", nullable = false, length = 120)
     private String title;
-
-    @Column(columnDefinition = "integer default 0")
-    private Integer views;
-
 }
 

@@ -1,37 +1,32 @@
 package request;
 
-import lombok.*;
+import event.Event;
 import jakarta.persistence.*;
+import lombok.*;
+import user.User;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "participation_request")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "participation_request")
 public class ParticipationRequest {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "event_id")
-    private Long eventId;
-
-    @Column(name = "requester_id")
-    private Long requesterId;
-
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status;
-
-    @Column(name = "created")
+    @Column(name = "created", nullable = false)
     private LocalDateTime created;
-
-    public enum RequestStatus {
-        PENDING,
-        CONFIRMED,
-        REJECTED,
-        CANCELED
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requester_id", nullable = false)
+    private User requester;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "request_status", nullable = false)
+    private RequestStatus status;
 }

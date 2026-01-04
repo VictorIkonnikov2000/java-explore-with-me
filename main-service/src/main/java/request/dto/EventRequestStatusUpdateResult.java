@@ -1,14 +1,19 @@
 package request.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventRequestStatusUpdateResult {
-    private List<ParticipationRequestDto> confirmedRequests;
-    private List<ParticipationRequestDto> rejectedRequests;
+    @Builder.Default
+    private List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
+    @Builder.Default
+    private List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
 }

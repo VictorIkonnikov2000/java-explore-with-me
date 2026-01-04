@@ -1,21 +1,24 @@
 package compilation.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
+import lombok.*;
 import event.dto.EventShortDto;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class CompilationDto {
-
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
-    private String title;
-    private String description;
+    @Nullable
+    @Builder.Default
+    private List<EventShortDto> events = new ArrayList<>();
     private Boolean pinned;
-    private List<EventShortDto> events; // Use EventShortDto
+    private String title;
 }

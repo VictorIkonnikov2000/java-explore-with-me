@@ -1,19 +1,13 @@
 package user;
 
-
-
 import user.dto.NewUserRequest;
 import user.dto.UserDto;
-
-import java.util.List;
+import java.util.Collection;
 
 public interface UserService {
-    UserDto addUser(NewUserRequest newUserRequest);
+    UserDto saveUser(NewUserRequest request);
 
-    void deleteUser(Long userId);
+    Collection<UserDto> getUsers(Collection<Long> ids, int from, int size);
 
-    List<UserDto> getAllUsers();
-
-    UserDto getUserById(Long userId);
+    void deleteUser(Long id);
 }
-

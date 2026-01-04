@@ -1,54 +1,77 @@
 package user;
 
-import user.dto.NewUserRequest;
-import user.dto.UserDto;
-import exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import exception.BadRequestException;
+import exception.ConflictException;
+import exception.NotFoundException;
+import user.dto.NewUserRequest;
+import user.dto.UserDto;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repository;
     private final UserMapper userMapper;
 
     @Override
-    @Transactional
-    public UserDto addUser(NewUserRequest newUserRequest) {
-        if (userRepository.existsByEmail(newUserRequest.getEmail())) {
-            throw new DataIntegrityViolationException("User with email " + newUserRequest.getEmail() + " already exists"); // Или другое исключение
+    public UserDto saveUser(NewUserRequest request) {
+
+        if (request == null) {
+            throw new BadRequestException("Запрос на добавление нового пользователя не может быть null");
         }
-        User user = userMapper.toUser(newUserRequest);
-        return userMapper.toUserDto(userRepository.save(user));
+
+        isContainsEmail(request.getEmail());
+        User user = userMapper.mapToUser(request);
+        repository.save(user);
+        return userMapper.mapToUserDto(user);
     }
 
     @Override
-    @Transactional
-    public void deleteUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with id " + userId + " not found");
+    public void deleteUser(Long id) {
+        isContainsUser(id);
+        repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Collection<UserDto> getUsers(Collection<Long> ids, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size);
+        Page<User> usersPage;
+
+        if (ids != null) {
+            usersPage = repository.findByIdIn(ids, pageable);
+        } else {
+            usersPage = repository.findAll(pageable);
         }
-        userRepository.deleteById(userId);
+
+        List<User> userList = usersPage.getContent();
+        return userMapper.toUserDtoList(userList);
     }
 
-    @Override
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toUserDto)
-                .collect(Collectors.toList());
+    private void isContainsEmail(String email) {
+        boolean emailExists = repository.existsByEmail(email);
+
+        if (emailExists) {
+            throw new ConflictException("Пользователь с email: " + email + " существует");
+        }
     }
 
-    @Override
-    public UserDto getUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
-        return userMapper.toUserDto(user);
+    private void isContainsUser(Long id) {
+        Optional<User> optUser = repository.findById(id);
+
+        if (optUser.isEmpty()) {
+            throw new NotFoundException("Пользователь с id: " + id + " в базе отсутствует");
+        }
     }
 }
-

@@ -1,32 +1,39 @@
 package event.dto;
 
-
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import event.EventState;
+import lombok.*;
 import category.dto.CategoryDto;
-import event.Location;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
+import static constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
+
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class EventFullDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long id;
     private String annotation;
     private CategoryDto category;
-    private Integer confirmedRequests;
+    private Long confirmedRequests;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     private LocalDateTime createdOn;
     private String description;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
-    private Long id;
     private UserShortDto initiator;
-    private Location location;
+    private LocationDto location;
     private Boolean paid;
     private Integer participantLimit;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     private LocalDateTime publishedOn;
     private Boolean requestModeration;
-    private String state;
+    private EventState state;
     private String title;
-    private Integer views;
+    private Long views;
 }
-

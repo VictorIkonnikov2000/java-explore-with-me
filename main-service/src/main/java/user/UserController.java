@@ -1,29 +1,34 @@
 package user;
 
-
-
-import user.dto.NewUserRequest;
-import user.dto.UserDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import user.dto.NewUserRequest;
+import user.dto.UserDto;
 
-import jakarta.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @RestController
-@RequestMapping("/admin/users")
+@RequestMapping(path = "/admin/users")
 @RequiredArgsConstructor
 @Validated
 public class UserController {
-
     private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto addUser(@Valid @RequestBody NewUserRequest newUserRequest) {
-        return userService.addUser(newUserRequest);
+    public UserDto create(@RequestBody @Valid NewUserRequest request) {
+        return userService.saveUser(request);
+    }
+
+    @GetMapping
+    public Collection<UserDto> getUsers(@RequestParam(required = false) Collection<Long> ids,
+                                        @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                        @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+        return userService.getUsers(ids, from, size);
     }
 
     @DeleteMapping("/{userId}")
@@ -31,15 +36,4 @@ public class UserController {
     public void deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
     }
-
-    @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/{userId}")
-    public UserDto getUser(@PathVariable Long userId) {
-        return userService.getUserById(userId);
-    }
 }
-

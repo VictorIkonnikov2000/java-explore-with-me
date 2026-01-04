@@ -1,137 +1,94 @@
 package event;
 
-import category.dto.CategoryDto;
-import category.Category;
-import event.dto.EventFullDto;
-import event.dto.EventShortDto;
-import event.dto.NewEventDto;
-import event.dto.UpdateEventUserRequest;
-import user.User;
-import user.dto.UserShortDto;
-import org.springframework.stereotype.Component;
+import org.mapstruct.*;
+import category.CategoryMapper;
+import event.dto.*;
+import user.UserMapper;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Component
-public class EventMapper {
+import static constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static event.EventState.PENDING;
 
-    public EventFullDto toEventFullDto(Event event) {
-        EventFullDto dto = new EventFullDto();
-        dto.setId(event.getId());
-        dto.setAnnotation(event.getAnnotation());
-        dto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
-        dto.setConfirmedRequests(event.getConfirmedRequests());
-        dto.setCreatedOn(event.getCreatedOn());
-        dto.setDescription(event.getDescription());
-        dto.setEventDate(event.getEventDate());
-        dto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
-        dto.setPaid(event.getPaid());
-        dto.setParticipantLimit(event.getParticipantLimit());
-        dto.setPublishedOn(event.getPublishedOn());
-        dto.setRequestModeration(event.getRequestModeration());
-        dto.setState(event.getState());
-        dto.setTitle(event.getTitle());
-        dto.setViews(event.getViews());
+@Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class})
+public interface EventMapper {
 
-        // Create and set the Location object
-        Location location = new Location();
-        location.setLat(event.getLat());
-        location.setLon(event.getLon());
-        dto.setLocation(location);
+    @Mapping(target = "eventDate", source = "event.eventDate",
+            dateFormat = DATE_TIME_FORMAT)
+    @Mapping(target = "initiator", source = "event.initiator")
+    @Mapping(target = "category", source = "event.category")
+    @Mapping(target = "confirmedRequests", source = "event.confirmedRequests")
+    @Mapping(target = "views", ignore = true)
+    EventShortDto mapToEventShortDto(Event event);
 
-        return dto;
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "eventDate", source = "request.eventDate", dateFormat = DATE_TIME_FORMAT)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "eventState", ignore = true)
+    Event mapToEvent(NewEventDto request);
+
+    @AfterMapping
+    default void setDefaults(@MappingTarget Event event) {
+        if (event.getCreatedOn() == null) event.setCreatedOn(LocalDateTime.now());
+        if (event.getConfirmedRequests() == null) event.setConfirmedRequests(0L);
+        if (event.getEventState() == null) event.setEventState(PENDING);
     }
 
-    public Event toEvent(NewEventDto newEventDto, Category category, User initiator) {
-        Event event = new Event();
-        event.setAnnotation(newEventDto.getAnnotation());
-        event.setCategory(category);
-        event.setDescription(newEventDto.getDescription());
-        event.setEventDate(newEventDto.getEventDate());
-        event.setPaid(newEventDto.getPaid());
-        event.setParticipantLimit(newEventDto.getParticipantLimit());
-        event.setRequestModeration(newEventDto.getRequestModeration());
-        event.setTitle(newEventDto.getTitle());
-        event.setConfirmedRequests(0);
-        event.setCreatedOn(LocalDateTime.now());
-        event.setState(State.PENDING.toString());  // Convert enum to String
-        event.setViews(0);
-        event.setInitiator(initiator);
+    @Mapping(target = "createdOn", source = "event.createdOn", dateFormat = DATE_TIME_FORMAT)
+    @Mapping(target = "eventDate", source = "event.eventDate", dateFormat = DATE_TIME_FORMAT)
+    @Mapping(target = "publishedOn", source = "event.publishedOn", dateFormat = DATE_TIME_FORMAT)
+    @Mapping(target = "state", source = "event.eventState")
+    @Mapping(target = "initiator", source = "event.initiator")
+    @Mapping(target = "category", source = "event.category")
+    @Mapping(target = "location", source = "event.location")
+    @Mapping(target = "confirmedRequests", source = "event.confirmedRequests")
+    @Mapping(target = "views", ignore = true)
+    EventFullDto mapToEventFullDto(Event event);
 
-        // Set Location details from NewEventDto
-        event.setLat(newEventDto.getLocation().getLat());
-        event.setLon(newEventDto.getLocation().getLon());
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "eventState", ignore = true)
+    @Mapping(target = "eventDate", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "annotation", source = "request.annotation")
+    @Mapping(target = "description", source = "request.description")
+    @Mapping(target = "location", source = "request.location")
+    @Mapping(target = "paid", source = "request.paid")
+    @Mapping(target = "participantLimit", source = "request.participantLimit")
+    @Mapping(target = "requestModeration", source = "request.requestModeration")
+    @Mapping(target = "title", source = "request.title")
+    void updateFromRequestUser(UpdateEventUserRequest request, @MappingTarget Event event);
 
-        return event;
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "eventState", ignore = true)
+    @Mapping(target = "eventDate", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "annotation", source = "annotation")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "paid", source = "paid")
+    @Mapping(target = "participantLimit", source = "participantLimit")
+    @Mapping(target = "requestModeration", source = "requestModeration")
+    @Mapping(target = "title", source = "title")
+    void updateFromRequestAdmin(UpdateEventAdminRequest request, @MappingTarget Event event);
 
-    public EventShortDto toEventShortDto(Event event) {
-        EventShortDto dto = new EventShortDto();
-        dto.setId(event.getId());
-        dto.setAnnotation(event.getAnnotation());
-        dto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
-        dto.setConfirmedRequests(event.getConfirmedRequests());
-        dto.setEventDate(event.getEventDate());
-        dto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
-        dto.setPaid(event.getPaid());
-        dto.setTitle(event.getTitle());
-        dto.setViews(event.getViews());
+    List<EventFullDto> toFullDtoList(List<Event> eventList);
 
-        return dto;
-    }
-
-    public Event updateEventFromDto(UpdateEventUserRequest updateEventUserRequest, Event event, Category category) {
-        if (updateEventUserRequest.getAnnotation() != null) {
-            event.setAnnotation(updateEventUserRequest.getAnnotation());
-        }
-        if (category != null) {
-            event.setCategory(category);
-        }
-        if (updateEventUserRequest.getDescription() != null) {
-            event.setDescription(updateEventUserRequest.getDescription());
-        }
-        if (updateEventUserRequest.getEventDate() != null) {
-            event.setEventDate(updateEventUserRequest.getEventDate());
-        }
-
-        if (updateEventUserRequest.getLocation() != null) {
-            event.setLat(updateEventUserRequest.getLocation().getLat());
-            event.setLon(updateEventUserRequest.getLocation().getLon());
-        }
-
-        if (updateEventUserRequest.getPaid() != null) {
-            event.setPaid(updateEventUserRequest.getPaid());
-        }
-        if (updateEventUserRequest.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventUserRequest.getParticipantLimit());
-        }
-        if (updateEventUserRequest.getRequestModeration() != null) {
-            event.setRequestModeration(updateEventUserRequest.getRequestModeration());
-        }
-        if (updateEventUserRequest.getTitle() != null) {
-            event.setTitle(updateEventUserRequest.getTitle());
-        }
-
-        return event;
-    }
-
-    private static class CategoryMapper {
-        public static CategoryDto toCategoryDto(Category category) {
-            CategoryDto dto = new CategoryDto();
-            dto.setId(category.getId());
-            dto.setName(category.getName());
-            return dto;
-        }
-    }
-
-    private static class UserMapper {
-        public static UserShortDto toUserShortDto(User user) {
-            UserShortDto dto = new UserShortDto();
-            dto.setId(user.getId());
-            dto.setName(user.getName());
-            return dto;
-        }
-    }
+    List<EventShortDto> toShortDtoList(List<Event> eventList);
 }
 
 

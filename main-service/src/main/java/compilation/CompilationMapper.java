@@ -1,51 +1,26 @@
 package compilation;
 
-
+import org.mapstruct.*;
 import compilation.dto.CompilationDto;
 import compilation.dto.NewCompilationDto;
 import compilation.dto.UpdateCompilationRequest;
-import event.dto.EventShortDto;
-import event.Event;
-import org.springframework.stereotype.Component;
+import event.EventMapper;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
-@Component
-public class CompilationMapper {
+@Mapper(componentModel = "spring", uses = {EventMapper.class})
+public interface CompilationMapper {
 
-    public CompilationDto toCompilationDto(Compilation compilation) {
-        return new CompilationDto(
-                compilation.getId(),
-                compilation.getTitle(),
-                compilation.getDescription(),
-                compilation.getPinned(),
-                (compilation.getEvents() != null) ? compilation.getEvents().stream().map(this::toEventShortDto).collect(Collectors.toList()) : null // Replace with toEventShortDto!
-        );
-    }
+    CompilationDto mapToCompilationDto(Compilation compilation);
 
-    public Compilation toCompilation(NewCompilationDto newCompilationDto) {
-        Compilation compilation = new Compilation();
-        compilation.setTitle(newCompilationDto.getTitle());
-        compilation.setDescription(newCompilationDto.getDescription());
-        compilation.setPinned(newCompilationDto.getPinned());
-        return compilation;
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "events", ignore = true)
+    Compilation mapToCompilation(NewCompilationDto request);
 
-    public EventShortDto toEventShortDto(Event event) { // Заглушка. нужно прописать логику как в eventMapper.
-        return null;
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "events", ignore = true)
+    void updateFromRequest(UpdateCompilationRequest request, @MappingTarget Compilation compilation);
 
-    ;
-
-    public void updateCompilation(UpdateCompilationRequest updateCompilationRequest, Compilation compilation) {
-        if (updateCompilationRequest.getTitle() != null) {
-            compilation.setTitle(updateCompilationRequest.getTitle());
-        }
-        if (updateCompilationRequest.getDescription() != null) {
-            compilation.setDescription(updateCompilationRequest.getDescription());
-        }
-        if (updateCompilationRequest.getPinned() != null) {
-            compilation.setPinned(updateCompilationRequest.getPinned());
-        }
-    }
+    List<CompilationDto> toCompilationDtoList(List<Compilation> compilationList);
 }

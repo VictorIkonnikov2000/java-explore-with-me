@@ -1,39 +1,32 @@
 package compilation;
 
-
-import event.Event;
-import lombok.*;
-
 import jakarta.persistence.*;
-import java.util.List;
+import lombok.*;
+import event.Event;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "compilations")
-@Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "compilations")
 public class Compilation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, length = 50)
-    private String title;
-
-    @Column(length = 2000) // Reasonable size for description
-    private String description;
-
-    @Column(nullable = false)
-    private Boolean pinned;
-
     @ManyToMany
-    @JoinTable(
-            name = "compilation_events",
+    @JoinTable(name = "compilation_events",
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    private List<Event> events;  //Связь Compilation и Event
+    @Builder.Default
+    private Set<Event> events = new HashSet<>();
+    @Column(name = "pinned", nullable = false)
+    private Boolean pinned;
+    @Column(name = "title", nullable = false, length = 50)
+    private String title;
 }

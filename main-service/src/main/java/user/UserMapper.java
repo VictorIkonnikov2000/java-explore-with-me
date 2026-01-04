@@ -1,56 +1,23 @@
 package user;
 
-
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import user.dto.NewUserRequest;
 import user.dto.UserDto;
 import user.dto.UserShortDto;
-import org.springframework.stereotype.Component;
 
-@Component
-public class UserMapper {
+import java.util.List;
 
-    public UserDto toUserDto(User user) {
-        if (user == null) {
-            return null;
-        }
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setName(user.getName());
-        userDto.setEmail(user.getEmail());
-        return userDto;
-    }
+    UserDto mapToUserDto(User user);
 
-    public User toUser(NewUserRequest newUserRequest) {
-        if (newUserRequest == null) {
-            return null;
-        }
+    UserShortDto mapToUserShortDto(User user);
 
-        User user = new User();
-        user.setName(newUserRequest.getName());
-        user.setEmail(newUserRequest.getEmail());
-        return user;
-    }
+    @Mapping(target = "id", ignore = true)
+    User mapToUser(NewUserRequest request);
 
-    public UserShortDto toUserShortDto(User user) {
-        if (user == null) {
-            return null;
-        }
-
-        UserShortDto userShortDto = new UserShortDto();
-        userShortDto.setId(user.getId());
-        userShortDto.setName(user.getName());
-        return userShortDto;
-    }
-
-    public User toUser(UserDto userDto) {
-        if (userDto == null) {
-            return null;
-        }
-        User user = new User();
-        user.setId(userDto.getId());
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-        return user;
-    }
+    List<UserDto> toUserDtoList(List<User> user);
 }
+

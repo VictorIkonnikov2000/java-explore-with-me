@@ -1,4 +1,4 @@
-package exception;
+package constans;
 
 import lombok.experimental.UtilityClass;
 
