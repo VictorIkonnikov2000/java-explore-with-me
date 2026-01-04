@@ -15,7 +15,7 @@ import ru.practicum.error.exceptions.NotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.constans.ErrorReasons.*;
+import static ru.practicum.constants.ErrorReasons.*;
 
 @RestControllerAdvice
 @Slf4j

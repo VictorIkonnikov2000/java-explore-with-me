@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @Data
 @Builder
