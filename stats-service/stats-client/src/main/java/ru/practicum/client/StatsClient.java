@@ -8,19 +8,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.EndpointHitDto;
+import ru.practicum.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static ru.practicum.constant.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @Component
 @Slf4j
 public class StatsClient {
 
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+            DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
     private final RestTemplate restTemplate;
 
