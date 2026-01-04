@@ -1,16 +1,25 @@
 package ru.practicum.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
-@Setter
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+
+    @NotBlank(message = "Name cannot be blank")
+    @Size(min = 2, max = 250, message = "Name must be between 2 and 250 characters")
     private String name;
+
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Invalid email format")
+    @Size(min = 6, max = 254, message = "Email must be between 6 and 254 characters")
     private String email;
 }

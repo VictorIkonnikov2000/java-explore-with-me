@@ -5,17 +5,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-@Setter
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewUserRequest {
-    @NotBlank(message = "Имя не может быть пустым")
-    @Size(min = 2, max = 250, message = "Длинна имени должна быть от 2 до 250 символов")
+    @NotBlank(message = "Name cannot be blank")
+    @Size(min = 2, max = 250, message = "Name must be between 2 and 250 characters")
     private String name;
-    @NotBlank(message = "Email не может быть пустым")
-    @Email(message = "Неверный формат электронной почты")
-    @Size(min = 6, max = 254, message = "Длинна email должна быть от 6 до 254 символов")
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Invalid email format")
+    @Size(min = 6, max = 254, message = "Email must be between 6 and 254 characters")
     private String email;
 }
