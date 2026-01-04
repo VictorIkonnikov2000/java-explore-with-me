@@ -21,14 +21,14 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     @Transactional
-    public void createHit(EndpointHitDto dto) {
+    public void saveHit(EndpointHitDto dto) {
         EndpointHit endpointHit = endpointHitMapper.toEndpointHit(dto);
         EndpointHit saveHit = endpointHitRepository.save(endpointHit);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ViewStatsDto> getStatDto(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
 
         if (start == null || end == null) {
             throw new BadRequestException("Временной промежуток должен быть задан");
@@ -39,7 +39,7 @@ public class StatsServiceImpl implements StatsService {
         }
 
         if (unique) {
-            return endpointHitRepository.findUniqueStats(start, end, uris);
+            return endpointHitRepository.findUniqueStatsAll(start, end, uris);
         } else {
             return endpointHitRepository.findNotUniqueStats(start, end, uris);
         }

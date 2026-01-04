@@ -22,7 +22,7 @@ public class StatsController {
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@RequestBody @Valid EndpointHitDto endpointHitDto) {
-        statsService.createHit(endpointHitDto);
+        statsService.saveHit(endpointHitDto);
     }
 
     @GetMapping("/stats")
@@ -32,6 +32,6 @@ public class StatsController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique) {
 
-        return statsService.getStatDto(start, end, uris, unique);
+        return statsService.getStats(start, end, uris, unique);
     }
 }
