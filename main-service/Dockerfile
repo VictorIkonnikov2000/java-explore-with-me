@@ -1,5 +1,3 @@
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-COPY target/main-service-*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM amazoncorretto:21
+COPY target/*.jar stats-server.jar
+ENTRYPOINT ["java", "-jar", "/stats-server.jar"]
