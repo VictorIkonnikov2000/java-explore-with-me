@@ -11,7 +11,7 @@ import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.model.Category;
 import ru.practicum.client.StatsClient;
 import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.dto.StatDto;
+import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.error.exceptions.*;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.dto.*;
@@ -337,7 +337,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Long loadViews(Event event, String uri, boolean unique) {
-        List<StatDto> stats = statsClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
+        List<ViewStatsDto> stats = statsClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
                 List.of(uri), unique);
 
         Long views;
@@ -368,7 +368,7 @@ public class EventServiceImpl implements EventService {
         Map<String, Long> viewsEvents;
 
         if (!uris.isEmpty() && minPublished.isPresent()) {
-            List<StatDto> stats = statsClient.getStats(
+            List<ViewStatsDto> stats = statsClient.getStats(
                     minPublished.get(),
                     LocalDateTime.now(),
                     uris,
@@ -377,8 +377,8 @@ public class EventServiceImpl implements EventService {
 
             viewsEvents = stats.stream()
                     .collect(Collectors.toMap(
-                            StatDto::getUri,
-                            StatDto::getHits
+                            ViewStatsDto::getUri,
+                            ViewStatsDto::getHits
                     ));
         } else {
             viewsEvents = Map.of();

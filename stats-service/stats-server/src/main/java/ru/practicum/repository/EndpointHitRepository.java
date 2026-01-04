@@ -3,7 +3,7 @@ package ru.practicum.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.practicum.dto.StatDto;
+import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.model.EndpointHit;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> {
     @Query(
             """
-            SELECT new ru.practicum.dto.StatDto(eh.app, eh.uri, COUNT(eh.id))
+            SELECT new ru.practicum.dto.ViewStatsDto(eh.app, eh.uri, COUNT(eh.id))
             FROM EndpointHit eh
             WHERE eh.timestamp
             BETWEEN :start
@@ -21,13 +21,13 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             ORDER BY COUNT(eh.id) DESC
             """
     )
-    List<StatDto> findNotUniqueStats(@Param("start") LocalDateTime start,
-                                     @Param("end") LocalDateTime end,
-                                     @Param("uris") List<String> uris);
+    List<ViewStatsDto> findNotUniqueStats(@Param("start") LocalDateTime start,
+                                          @Param("end") LocalDateTime end,
+                                          @Param("uris") List<String> uris);
 
     @Query(
             """
-            SELECT new ru.practicum.dto.StatDto(eh.app, eh.uri, COUNT(DISTINCT eh.ip))
+            SELECT new ru.practicum.dto.ViewStatsDto(eh.app, eh.uri, COUNT(DISTINCT eh.ip))
             FROM EndpointHit eh
             WHERE eh.timestamp
             BETWEEN :start
@@ -37,7 +37,7 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             ORDER BY COUNT(DISTINCT eh.ip) DESC
             """
     )
-    List<StatDto> findUniqueStats(@Param("start") LocalDateTime start,
-                                  @Param("end") LocalDateTime end,
-                                  @Param("uris") List<String> uris);
+    List<ViewStatsDto> findUniqueStats(@Param("start") LocalDateTime start,
+                                       @Param("end") LocalDateTime end,
+                                       @Param("uris") List<String> uris);
 }
