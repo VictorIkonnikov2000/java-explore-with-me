@@ -1,16 +1,14 @@
 package ru.practicum.service;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.dto.StatDto;
+import ru.practicum.dal.EndpointHitRepository;
 import ru.practicum.error.exceptions.BadRequestException;
 import ru.practicum.mapper.HitMapper;
 import ru.practicum.model.EndpointHit;
-import ru.practicum.repository.EndpointHitRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -47,4 +45,3 @@ public class StatsServiceImpl implements StatsService {
         }
     }
 }
-
