@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.repository.EndpointHitRepository;
-import ru.practicum.exception.BadRequestException;
+import ru.practicum.error.exceptions.BadRequestException;
 import ru.practicum.mapper.EndpointHitMapper;
 import ru.practicum.model.EndpointHit;
 import java.time.LocalDateTime;
