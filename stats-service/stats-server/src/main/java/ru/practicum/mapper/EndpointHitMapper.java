@@ -5,7 +5,7 @@ import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.model.EndpointHit;
 
 @Component
-public class HitMapper {
+public class EndpointHitMapper {
     public EndpointHit mapToEndpointHit(EndpointHitDto dto) {
         return EndpointHit.builder()
                 .app(dto.getApp())

@@ -7,7 +7,7 @@ import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.repository.EndpointHitRepository;
 import ru.practicum.error.exceptions.BadRequestException;
-import ru.practicum.mapper.HitMapper;
+import ru.practicum.mapper.EndpointHitMapper;
 import ru.practicum.model.EndpointHit;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,13 +16,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
 
-    private final HitMapper hitMapper;
+    private final EndpointHitMapper endpointHitMapper;
     private final EndpointHitRepository endpointHitRepository;
 
     @Override
     @Transactional
     public void createHit(EndpointHitDto dto) {
-        EndpointHit endpointHit = hitMapper.mapToEndpointHit(dto);
+        EndpointHit endpointHit = endpointHitMapper.mapToEndpointHit(dto);
         EndpointHit saveHit = endpointHitRepository.save(endpointHit);
     }
 

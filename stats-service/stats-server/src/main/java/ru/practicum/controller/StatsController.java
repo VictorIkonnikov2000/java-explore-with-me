@@ -16,7 +16,7 @@ import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @RestController
 @RequiredArgsConstructor
-public class StatController {
+public class StatsController {
     private final StatsService statsService;
 
     @PostMapping("/hit")
