@@ -1,12 +1,12 @@
 package ru.practicum.mapper;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.model.EndpointHit;
 
 @Component
 public class HitMapper {
-    public EndpointHit mapToEndpointHit(RequestHitDto dto) {
+    public EndpointHit mapToEndpointHit(EndpointHitDto dto) {
         return EndpointHit.builder()
                 .app(dto.getApp())
                 .uri(dto.getUri())

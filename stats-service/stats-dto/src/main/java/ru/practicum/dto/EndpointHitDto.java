@@ -12,7 +12,7 @@ import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestHitDto {
+public class EndpointHitDto {
     @NotBlank(message = "Идентификатор сервиса не может быть пустым")
     private String app;
     @NotBlank(message = "URI не может быть пустым")

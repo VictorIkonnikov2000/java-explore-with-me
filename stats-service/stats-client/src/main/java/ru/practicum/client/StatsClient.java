@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.dto.RequestHitDto;
-import ru.practicum.dto.StatDto;
+import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,12 +31,12 @@ public class StatsClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public void createHit(RequestHitDto requestHitDto) {
+    public void createHit(EndpointHitDto endpointHitDto) {
         String url = serverUrl + "/hit";
 
-        log.info("Отправка хита на {}: {}", url, requestHitDto);
+        log.info("Отправка хита на {}: {}", url, endpointHitDto);
 
-        HttpEntity<RequestHitDto> request = new HttpEntity<>(requestHitDto, defaultHeaders());
+        HttpEntity<EndpointHitDto> request = new HttpEntity<>(endpointHitDto, defaultHeaders());
 
         try {
             ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
@@ -55,8 +55,8 @@ public class StatsClient {
         }
     }
 
-    public List<StatDto> getStats(LocalDateTime start, LocalDateTime end,
-                                  List<String> uris, boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
+                                       List<String> uris, boolean unique) {
 
         String startStr = start.format(FORMATTER);
         String endStr = end.format(FORMATTER);
@@ -78,7 +78,7 @@ public class StatsClient {
         HttpEntity<Void> requestEntity = new HttpEntity<>(defaultHeaders());
 
         try {
-            ResponseEntity<List<StatDto>> response = restTemplate.exchange(
+            ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     requestEntity,
