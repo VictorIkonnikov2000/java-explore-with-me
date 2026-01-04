@@ -38,11 +38,6 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             """
     )
     List<ViewStatsDto> findUniqueStatsAll(@Param("start") LocalDateTime start,
-                                          @Param("end") LocalDateTime end);
-
-    List<ViewStatsDto> findStatsByUris(LocalDateTime start, LocalDateTime end, List<String> uris);
-
-    List<ViewStatsDto> findStatsAll(LocalDateTime start, LocalDateTime end);
-
-    List<ViewStatsDto> findUniqueStatsByUris(LocalDateTime start, LocalDateTime end, List<String> uris);
+                                          @Param("end") LocalDateTime end,
+                                          @Param("uris") List<String> uris);
 }
