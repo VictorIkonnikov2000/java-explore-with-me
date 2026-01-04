@@ -1,11 +1,11 @@
-package ru.practicum.error;
+package ru.practicum.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.error.exceptions.BadRequestException;
+import ru.practicum.exception.exceptions.BadRequestException;
 
 @RestControllerAdvice
 public class ErrorHandler {
