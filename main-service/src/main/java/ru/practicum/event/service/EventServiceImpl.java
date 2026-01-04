@@ -213,7 +213,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие с id " + eventId + " не найдено");
         }
 
-        String uri = EVENT + eventId;
+        String uri = servletRequest.getRequestURI();
 
         EndpointHitDto requestHitDto = EndpointHitDto.builder()
                 .app("ewm-main-service")
