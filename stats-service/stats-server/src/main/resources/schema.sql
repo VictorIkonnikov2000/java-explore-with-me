@@ -1,4 +1,5 @@
-//создание таблицы
+DROP TABLE IF EXISTS endpoint_hit CASCADE;
+
 CREATE TABLE IF NOT EXISTS endpoint_hit (
     id BIGSERIAL PRIMARY KEY,
     app VARCHAR(255) NOT NULL,
