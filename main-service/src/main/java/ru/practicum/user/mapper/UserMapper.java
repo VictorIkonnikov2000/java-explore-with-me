@@ -1,24 +1,57 @@
 package ru.practicum.user.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface UserMapper {
+@Component
+public class UserMapper {
 
-    UserDto mapToUserDto(User user);
+    public UserDto mapToUserDto(User user) {
+        if (user == null) {
+            return null;
+        }
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
+    }
 
-    UserShortDto mapToUserShortDto(User user);
+    public UserShortDto mapToUserShortDto(User user) {
+        if (user == null) {
+            return null;
+        }
+        return UserShortDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .build();
+    }
 
-    @Mapping(target = "id", ignore = true)
-    User mapToUser(NewUserRequest request);
+    public User mapToUser(NewUserRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .build();
+    }
 
-    List<UserDto> toUserDtoList(List<User> user);
+    public List<UserDto> toUserDtoList(List<User> users) {
+        if (users == null) {
+            return new ArrayList<>();
+        }
+        return users.stream()
+                .map(this::mapToUserDto)
+                .collect(Collectors.toList());
+    }
 }
+
 
