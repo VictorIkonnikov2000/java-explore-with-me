@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "endpoint_hit")
+@Table(name = "hits")
 public class EndpointHit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +25,6 @@ public class EndpointHit {
     @Column(name = "ip", nullable = false)
     private String ip;
 
-    @Column(name = "time_request")
+    @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 }
