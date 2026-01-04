@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import category.CategoryRepository;
 import category.Category;
-import client.StatsClient;
-import dto.EndpointHitDto;
-import dto.ViewStatsDto;
+import ru.practicum.client.StatClient;
+import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.StatDto;
 import exception.*;
 import event.dto.*;
 import user.UserRepository;
@@ -33,7 +33,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
-    private final StatsClient statClient;
+    private final StatClient statClient;
 
     private static final String EVENT = "/events/";
 
@@ -211,14 +211,14 @@ public class EventServiceImpl implements EventService {
 
         String uri = EVENT + eventId;
 
-        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+        RequestHitDto requestHitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
                 .uri(uri)
                 .ip(servletRequest.getRemoteAddr())
-                .timestamp(LocalDateTime.now().toString())
+                .timestamp(LocalDateTime.now())
                 .build();
 
-        statClient.hit(endpointHitDto);
+        statClient.createHit(requestHitDto);
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
@@ -246,14 +246,14 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = repository.findByParametersForPublicController(text, categoryId, dataTime,
                 rangeEnd, paid, onlyAvailable, pageable);
 
-        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+        RequestHitDto requestHitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now().toString())
+                .timestamp(LocalDateTime.now())
                 .build();
 
-        statClient.hit(endpointHitDto);
+        statClient.createHit(requestHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {
@@ -333,7 +333,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Long loadViews(Event event, String uri, boolean unique) {
-        List<ViewStatsDto> stats = statClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
+        List<StatDto> stats = statClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
                 List.of(uri), unique);
 
         Long views;
@@ -364,7 +364,7 @@ public class EventServiceImpl implements EventService {
         Map<String, Long> viewsEvents;
 
         if (!uris.isEmpty() && minPublished.isPresent()) {
-            List<ViewStatsDto> stats = statClient.getStats(
+            List<StatDto> stats = statClient.getStats(
                     minPublished.get(),
                     LocalDateTime.now(),
                     uris,
@@ -373,23 +373,27 @@ public class EventServiceImpl implements EventService {
 
             viewsEvents = stats.stream()
                     .collect(Collectors.toMap(
-                            ViewStatsDto::getUri,
-                            ViewStatsDto::getHits
+                            StatDto::getUri,
+                            StatDto::getHits
                     ));
         } else {
             viewsEvents = Map.of();
         }
 
-        List<EventFullDto> eventFullDtoList = new ArrayList<>();
+        return eventList.stream()
+                .map(event -> {
+                    EventFullDto dto = eventMapper.mapToEventFullDto(event);
 
-        for (Event event : eventList) {
-            EventFullDto eventFullDto = eventMapper.mapToEventFullDto(event);
-            String uri = EVENT + event.getId();
-            Long views = viewsEvents.getOrDefault(uri, 0L);
-            eventFullDto.setViews(views);
-            eventFullDtoList.add(eventFullDto);
-        }
+                    if (event.getEventState() == PUBLISHED && event.getPublishedOn() != null) {
+                        String uri = EVENT + event.getId();
+                        Long views = viewsEvents.getOrDefault(uri, 0L);
+                        dto.setViews(views);
+                    } else {
+                        dto.setViews(0L);
+                    }
 
-        return eventFullDtoList;
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
