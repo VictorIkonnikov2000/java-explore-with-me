@@ -5,14 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import dto.RequestHitDto;
-import dto.StatDto;
+import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.StatDto;
 import ru.practicum.service.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @RestController
 @RequiredArgsConstructor

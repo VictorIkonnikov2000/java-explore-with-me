@@ -1,4 +1,4 @@
-package dto;
+package ru.practicum.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;

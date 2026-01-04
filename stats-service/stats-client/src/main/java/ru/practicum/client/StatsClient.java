@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import dto.RequestHitDto;
-import dto.StatDto;
+import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.StatDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

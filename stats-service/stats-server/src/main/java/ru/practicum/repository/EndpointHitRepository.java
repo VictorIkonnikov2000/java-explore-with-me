@@ -3,7 +3,7 @@ package ru.practicum.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import dto.StatDto;
+import ru.practicum.dto.StatDto;
 import ru.practicum.model.EndpointHit;
 import java.time.LocalDateTime;
 import java.util.List;
