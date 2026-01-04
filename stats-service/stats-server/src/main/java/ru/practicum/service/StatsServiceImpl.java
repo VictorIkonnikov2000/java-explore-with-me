@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.dto.StatDto;
+import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.repository.EndpointHitRepository;
 import ru.practicum.error.exceptions.BadRequestException;
 import ru.practicum.mapper.HitMapper;
@@ -28,7 +28,7 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StatDto> getStatDto(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+    public List<ViewStatsDto> getStatDto(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
 
         if (start == null || end == null) {
             throw new BadRequestException("Временной промежуток должен быть задан");
