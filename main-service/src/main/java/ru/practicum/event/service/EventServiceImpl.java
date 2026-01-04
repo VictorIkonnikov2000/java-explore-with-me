@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.model.Category;
-import ru.practicum.client.StatClient;
+import client.StatsClient;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.dto.StatDto;
 import ru.practicum.error.exceptions.*;
@@ -37,7 +37,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
-    private final StatClient statClient;
+    private final StatsClient statsClient;
 
     private static final String EVENT = "/events/";
 
@@ -222,7 +222,7 @@ public class EventServiceImpl implements EventService {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statClient.createHit(requestHitDto);
+        statsClient.createHit(requestHitDto);
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
@@ -257,7 +257,7 @@ public class EventServiceImpl implements EventService {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statClient.createHit(requestHitDto);
+        statsClient.createHit(requestHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {
@@ -337,7 +337,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Long loadViews(Event event, String uri, boolean unique) {
-        List<StatDto> stats = statClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
+        List<StatDto> stats = statsClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
                 List.of(uri), unique);
 
         Long views;
@@ -368,7 +368,7 @@ public class EventServiceImpl implements EventService {
         Map<String, Long> viewsEvents;
 
         if (!uris.isEmpty() && minPublished.isPresent()) {
-            List<StatDto> stats = statClient.getStats(
+            List<StatDto> stats = statsClient.getStats(
                     minPublished.get(),
                     LocalDateTime.now(),
                     uris,
