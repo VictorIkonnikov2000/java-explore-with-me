@@ -1,4 +1,4 @@
-package ru.practicum.category.dal;
+package ru.practicum.category.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

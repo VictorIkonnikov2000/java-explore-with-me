@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.compilation.dal.CompilationRepository;
+import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationRequest;
@@ -14,7 +14,7 @@ import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.error.exceptions.BadRequestException;
 import ru.practicum.error.exceptions.NotFoundException;
-import ru.practicum.event.dal.EventRepository;
+import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.model.Event;
 
 import java.util.*;

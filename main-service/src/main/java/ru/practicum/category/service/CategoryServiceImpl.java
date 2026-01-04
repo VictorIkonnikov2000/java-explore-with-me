@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.category.dal.CategoryRepository;
+import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.mapper.CategoryMapper;
@@ -14,7 +14,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.error.exceptions.BadRequestException;
 import ru.practicum.error.exceptions.ConflictException;
 import ru.practicum.error.exceptions.NotFoundException;
-import ru.practicum.event.dal.EventRepository;
+import ru.practicum.event.repository.EventRepository;
 
 import java.util.Collection;
 import java.util.List;
