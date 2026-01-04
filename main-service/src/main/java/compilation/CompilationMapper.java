@@ -8,7 +8,6 @@ import event.dto.EventShortDto;
 import event.Event;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,9 +31,12 @@ public class CompilationMapper {
         return compilation;
     }
 
-    public  EventShortDto toEventShortDto(Event event) { // Заглушка. нужно прописать логику как в eventMapper.
+    public EventShortDto toEventShortDto(Event event) { // Заглушка. нужно прописать логику как в eventMapper.
         return null;
-    };
+    }
+
+    ;
+
     public void updateCompilation(UpdateCompilationRequest updateCompilationRequest, Compilation compilation) {
         if (updateCompilationRequest.getTitle() != null) {
             compilation.setTitle(updateCompilationRequest.getTitle());

@@ -49,7 +49,7 @@ public class EventService {
         if (!event.getInitiator().getId().equals(userId)) throw new NotFoundException("User is not the creator");
 
         Category category = null;
-        if(updateEventUserRequest.getCategory() != null){
+        if (updateEventUserRequest.getCategory() != null) {
             category = categoryRepository.findById(updateEventUserRequest.getCategory()).orElseThrow(() -> new NotFoundException("Category not found"));
         }
 

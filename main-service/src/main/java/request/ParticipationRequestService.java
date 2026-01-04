@@ -59,7 +59,7 @@ public class ParticipationRequestService {
                 throw new SecurityException("User is not allowed to update this request.");
             }
 
-            if (newStatus == ParticipationRequest.RequestStatus.CONFIRMED){
+            if (newStatus == ParticipationRequest.RequestStatus.CONFIRMED) {
                 request.setStatus(ParticipationRequest.RequestStatus.CONFIRMED);
                 confirmed.add(requestMapper.toDto(request));
             } else {
