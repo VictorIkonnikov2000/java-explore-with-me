@@ -3,7 +3,7 @@ package ru.practicum.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.dto.StatDto;
 import ru.practicum.model.EndpointHit;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,9 +21,9 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             ORDER BY COUNT(eh.id) DESC
             """
     )
-    List<ViewStatsDto> findNotUniqueStats(@Param("start") LocalDateTime start,
-                                          @Param("end") LocalDateTime end,
-                                          @Param("uris") List<String> uris);
+    List<StatDto> findNotUniqueStats(@Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end,
+                                     @Param("uris") List<String> uris);
 
     @Query(
             """
@@ -37,7 +37,7 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             ORDER BY COUNT(DISTINCT eh.ip) DESC
             """
     )
-    List<ViewStatsDto> findUniqueStats(@Param("start") LocalDateTime start,
-                                       @Param("end") LocalDateTime end,
-                                       @Param("uris") List<String> uris);
+    List<StatDto> findUniqueStats(@Param("start") LocalDateTime start,
+                                  @Param("end") LocalDateTime end,
+                                  @Param("uris") List<String> uris);
 }

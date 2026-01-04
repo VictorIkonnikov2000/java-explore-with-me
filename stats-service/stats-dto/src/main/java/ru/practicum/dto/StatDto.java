@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ViewStatsDto {
+public class StatDto {
     @NotBlank(message = "Идентификатор сервиса не может быть пустым")
     private String app;
     @NotBlank(message = "URI не может быть пустым")

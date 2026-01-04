@@ -9,7 +9,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.dto.StatDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,8 +55,8 @@ public class StatsClient {
         }
     }
 
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
-                                       List<String> uris, boolean unique) {
+    public List<StatDto> getStats(LocalDateTime start, LocalDateTime end,
+                                  List<String> uris, boolean unique) {
 
         String startStr = start.format(FORMATTER);
         String endStr = end.format(FORMATTER);
@@ -78,7 +78,7 @@ public class StatsClient {
         HttpEntity<Void> requestEntity = new HttpEntity<>(defaultHeaders());
 
         try {
-            ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
+            ResponseEntity<List<StatDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     requestEntity,
