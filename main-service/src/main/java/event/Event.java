@@ -69,5 +69,6 @@ public class Event {
 
     @Column(columnDefinition = "integer default 0")
     private Integer views;
+
 }
 

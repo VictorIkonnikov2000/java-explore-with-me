@@ -1,7 +1,7 @@
 package event;
 
 
-public enum EventState {
+public enum State {
     PENDING,
     PUBLISHED,
     CANCELED;

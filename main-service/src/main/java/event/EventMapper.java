@@ -2,15 +2,13 @@ package event;
 
 import category.dto.CategoryDto;
 import category.Category;
-
-import event.dto.LocationDto;
-import org.springframework.stereotype.Component;
 import event.dto.EventFullDto;
 import event.dto.EventShortDto;
 import event.dto.NewEventDto;
 import event.dto.UpdateEventUserRequest;
 import user.User;
 import user.dto.UserShortDto;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
@@ -31,10 +29,15 @@ public class EventMapper {
         dto.setParticipantLimit(event.getParticipantLimit());
         dto.setPublishedOn(event.getPublishedOn());
         dto.setRequestModeration(event.getRequestModeration());
-        dto.setState(event.getState().toString());
+        dto.setState(event.getState());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
-        dto.setLocation(LocationMapper.toLocationDto(event.getLocation()));
+
+        // Create and set the Location object
+        Location location = new Location();
+        location.setLat(event.getLat());
+        location.setLon(event.getLon());
+        dto.setLocation(location);
 
         return dto;
     }
@@ -51,13 +54,13 @@ public class EventMapper {
         event.setTitle(newEventDto.getTitle());
         event.setConfirmedRequests(0);
         event.setCreatedOn(LocalDateTime.now());
-        event.setState(State.PENDING);
+        event.setState(State.PENDING.toString());  // Convert enum to String
         event.setViews(0);
         event.setInitiator(initiator);
 
         // Set Location details from NewEventDto
-        event.setLat(newEventDto.getLat());
-        event.setLon(newEventDto.getLon());
+        event.setLat(newEventDto.getLocation().getLat());
+        event.setLon(newEventDto.getLocation().getLon());
 
         return event;
     }
@@ -91,14 +94,10 @@ public class EventMapper {
             event.setEventDate(updateEventUserRequest.getEventDate());
         }
 
-        // Update lat and lon if provided
-        if (updateEventUserRequest.getLat() != null) {
-            event.setLat(updateEventUserRequest.getLat());
+        if (updateEventUserRequest.getLocation() != null) {
+            event.setLat(updateEventUserRequest.getLocation().getLat());
+            event.setLon(updateEventUserRequest.getLocation().getLon());
         }
-        if (updateEventUserRequest.getLon() != null) {
-            event.setLon(updateEventUserRequest.getLon());
-        }
-
 
         if (updateEventUserRequest.getPaid() != null) {
             event.setPaid(updateEventUserRequest.getPaid());
@@ -133,13 +132,7 @@ public class EventMapper {
             return dto;
         }
     }
-
-    private static class LocationMapper {
-        public static LocationDto toLocationDto(Location location) {
-            LocationDto dto = new LocationDto();
-            dto.setLat(location.getLat());
-            dto.setLon(location.getLon());
-            return dto;
-        }
-    }
 }
+
+
+
