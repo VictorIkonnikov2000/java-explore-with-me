@@ -9,7 +9,7 @@ import ru.practicum.user.mapper.UserMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 import static ru.practicum.event.model.EventState.PENDING;
 
 @Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class})

@@ -8,7 +8,7 @@ import ru.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @Data
 @Builder
