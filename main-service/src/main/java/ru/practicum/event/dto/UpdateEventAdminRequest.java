@@ -9,7 +9,7 @@ import ru.practicum.event.model.UpdateAdminStateAction;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @Data
 @Builder

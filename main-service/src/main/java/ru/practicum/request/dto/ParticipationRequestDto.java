@@ -7,7 +7,7 @@ import ru.practicum.request.model.RequestStatus;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT_WITH_MILLIS;
+import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT_WITH_MILLIS;
 
 @Data
 @Builder

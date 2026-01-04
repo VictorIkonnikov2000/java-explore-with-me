@@ -14,7 +14,7 @@ import ru.practicum.event.service.EventService;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
+import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @RestController
 @RequestMapping(path = "/admin/events")
