@@ -91,6 +91,3 @@ public interface EventMapper {
 
     List<EventShortDto> toShortDtoList(List<Event> eventList);
 }
-
-
-

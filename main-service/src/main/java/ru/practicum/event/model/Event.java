@@ -50,4 +50,3 @@ public class Event {
     @Column(name = "title", nullable = false, length = 120)
     private String title;
 }
-

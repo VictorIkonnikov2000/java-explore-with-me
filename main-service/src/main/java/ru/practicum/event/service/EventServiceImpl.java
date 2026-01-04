@@ -7,18 +7,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.category.dal.CategoryRepository;
 import ru.practicum.category.model.Category;
-import ru.practicum.client.StatsClient;
-import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.client.StatClient;
+import ru.practicum.dto.RequestHitDto;
+import ru.practicum.dto.StatDto;
 import ru.practicum.error.exceptions.*;
-import ru.practicum.event.repository.EventRepository;
+import ru.practicum.event.dal.EventRepository;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
-import ru.practicum.user.repository.UserRepository;
+import ru.practicum.user.dal.UserRepository;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
@@ -37,7 +37,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
-    private final StatsClient statsClient;
+    private final StatClient statClient;
 
     private static final String EVENT = "/events/";
 
@@ -213,16 +213,16 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие с id " + eventId + " не найдено");
         }
 
-        String uri = servletRequest.getRequestURI();
+        String uri = EVENT + eventId;
 
-        EndpointHitDto requestHitDto = EndpointHitDto.builder()
+        RequestHitDto requestHitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
                 .uri(uri)
                 .ip(servletRequest.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(requestHitDto);
+        statClient.createHit(requestHitDto);
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
@@ -250,14 +250,14 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = repository.findByParametersForPublicController(text, categoryId, dataTime,
                 rangeEnd, paid, onlyAvailable, pageable);
 
-        EndpointHitDto requestHitDto = EndpointHitDto.builder()
+        RequestHitDto requestHitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        statsClient.createHit(requestHitDto);
+        statClient.createHit(requestHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {
@@ -337,7 +337,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Long loadViews(Event event, String uri, boolean unique) {
-        List<ViewStatsDto> stats = statsClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
+        List<StatDto> stats = statClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
                 List.of(uri), unique);
 
         Long views;
@@ -368,7 +368,7 @@ public class EventServiceImpl implements EventService {
         Map<String, Long> viewsEvents;
 
         if (!uris.isEmpty() && minPublished.isPresent()) {
-            List<ViewStatsDto> stats = statsClient.getStats(
+            List<StatDto> stats = statClient.getStats(
                     minPublished.get(),
                     LocalDateTime.now(),
                     uris,
@@ -377,8 +377,8 @@ public class EventServiceImpl implements EventService {
 
             viewsEvents = stats.stream()
                     .collect(Collectors.toMap(
-                            ViewStatsDto::getUri,
-                            ViewStatsDto::getHits
+                            StatDto::getUri,
+                            StatDto::getHits
                     ));
         } else {
             viewsEvents = Map.of();
