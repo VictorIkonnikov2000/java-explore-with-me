@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.model.Category;
-import client.StatsClient;
+import ru.practicum.client.StatsClient;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.dto.StatDto;
 import ru.practicum.error.exceptions.*;
