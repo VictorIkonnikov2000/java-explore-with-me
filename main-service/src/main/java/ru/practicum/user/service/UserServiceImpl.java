@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.error.exceptions.BadRequestException;
 import ru.practicum.error.exceptions.ConflictException;
 import ru.practicum.error.exceptions.NotFoundException;
-import ru.practicum.user.dal.UserRepository;
+import ru.practicum.user.repository.UserRepository;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.mapper.UserMapper;
