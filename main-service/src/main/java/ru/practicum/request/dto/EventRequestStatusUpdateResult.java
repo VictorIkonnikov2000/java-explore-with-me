@@ -2,18 +2,17 @@ package ru.practicum.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventRequestStatusUpdateResult {
-    @Builder.Default
-    private List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
-    @Builder.Default
-    private List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+    List<ParticipationRequestDto> confirmedRequests;
+    List<ParticipationRequestDto> rejectedRequests;
 }
