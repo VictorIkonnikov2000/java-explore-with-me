@@ -12,14 +12,14 @@ import ru.practicum.compilation.service.CompilationService;
 @RestController
 @RequestMapping(path = "/admin/compilations")
 @RequiredArgsConstructor
-public class CompilationAdminController {
+public class AdminCompilationController {
 
     private final CompilationService compilationService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto create(@RequestBody @Valid NewCompilationDto request) {
-        return compilationService.saveCompilation(request);
+        return compilationService.addCompilation(request);
     }
 
     @PatchMapping("/{compId}")

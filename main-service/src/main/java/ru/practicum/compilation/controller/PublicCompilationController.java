@@ -13,7 +13,7 @@ import java.util.Collection;
 @RequestMapping(path = "/compilations")
 @RequiredArgsConstructor
 @Validated
-public class CompilationController {
+public class PublicCompilationController {
 
     private final CompilationService compilationService;
 
@@ -26,6 +26,6 @@ public class CompilationController {
     public Collection<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
                                                       @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                                       @RequestParam(defaultValue = "10") @Min(1) Integer size) {
-        return compilationService.getCompilations(pinned, from, size);
+        return compilationService.getAllCompilations(pinned, from, size);
     }
 }

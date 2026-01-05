@@ -7,13 +7,13 @@ import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import java.util.Collection;
 
 public interface CompilationService {
-    CompilationDto saveCompilation(NewCompilationDto request);
-
-    CompilationDto updateCompilation(Long compId, UpdateCompilationRequest request);
+    CompilationDto addCompilation(NewCompilationDto request);
 
     void deleteCompilation(Long compId);
 
-    CompilationDto getCompilationById(Long compId);
+    CompilationDto updateCompilation(Long compId, UpdateCompilationRequest request);
 
-    Collection<CompilationDto> getCompilations(Boolean pinned, int from, int size);
+    Collection<CompilationDto> getAllCompilations(Boolean pinned, int from, int size);
+
+    CompilationDto getCompilationById(Long compId);
 }

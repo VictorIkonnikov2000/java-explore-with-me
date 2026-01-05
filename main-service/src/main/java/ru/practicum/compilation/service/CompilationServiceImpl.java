@@ -29,13 +29,13 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
     @Override
-    public CompilationDto saveCompilation(NewCompilationDto request) {
+    public CompilationDto addCompilation(NewCompilationDto request) {
 
         if (request == null) {
             throw new BadRequestException("Запрос на добавление новой подборки не может быть null");
         }
 
-        Compilation compilation = compilationMapper.mapToCompilation(request);
+        Compilation compilation = compilationMapper.toCompilation(request);
 
         if (request.getPinned() == null) {
             compilation.setPinned(false);
@@ -47,7 +47,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         Compilation saveCompilation = repository.save(compilation);
-        return compilationMapper.mapToCompilationDto(saveCompilation);
+        return compilationMapper.toCompilationDto(saveCompilation);
     }
 
     @Override
@@ -83,19 +83,19 @@ public class CompilationServiceImpl implements CompilationService {
             }
         }
 
-        return compilationMapper.mapToCompilationDto(compilation);
+        return compilationMapper.toCompilationDto(compilation);
     }
 
     @Override
     @Transactional(readOnly = true)
     public CompilationDto getCompilationById(Long compId) {
         Compilation compilation = isContainsCompilation(compId);
-        return compilationMapper.mapToCompilationDto(compilation);
+        return compilationMapper.toCompilationDto(compilation);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
+    public Collection<CompilationDto> getAllCompilations(Boolean pinned, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         Page<Compilation> compilationsPage;
 

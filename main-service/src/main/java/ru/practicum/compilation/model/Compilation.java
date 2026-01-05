@@ -5,11 +5,12 @@ import lombok.*;
 import ru.practicum.event.model.Event;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Setter
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +19,13 @@ public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "pinned", nullable = false)
+    private Boolean pinned;
+
+    @Column(name = "title", nullable = false, length = 50)
+    private String title;
+
     @ManyToMany
     @JoinTable(name = "compilation_events",
             joinColumns = @JoinColumn(name = "compilation_id"),
@@ -25,8 +33,17 @@ public class Compilation {
     )
     @Builder.Default
     private Set<Event> events = new HashSet<>();
-    @Column(name = "pinned", nullable = false)
-    private Boolean pinned;
-    @Column(name = "title", nullable = false, length = 50)
-    private String title;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Compilation that = (Compilation) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
