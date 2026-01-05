@@ -9,11 +9,11 @@ import ru.practicum.error.exceptions.NotFoundException;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
-import ru.practicum.request.repository.ParticipationRequestRepository;
+import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.request.mapper.ParticipationRequestMapper;
+import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.ParticipationRequest;
 import ru.practicum.user.repository.UserRepository;
 import ru.practicum.user.model.User;
@@ -26,12 +26,12 @@ import static ru.practicum.request.model.RequestStatus.*;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ParticipationRequestServiceImpl implements ParticipationRequestService {
+public class RequestServiceImpl implements RequestService {
 
-    private final ParticipationRequestRepository repository;
+    private final RequestRepository repository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-    private final ParticipationRequestMapper participationRequestMapper;
+    private final RequestMapper requestMapper;
 
     @Override
     public ParticipationRequestDto saveRequest(Long userId, Long eventId) {
@@ -75,7 +75,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         repository.save(request);
 
-        return participationRequestMapper.mapToParticipationRequestDto(request);
+        return requestMapper.mapToParticipationRequestDto(request);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Collection<ParticipationRequest> requests = repository.findByRequester(user);
         List<ParticipationRequest> requestList = new ArrayList<>(requests);
 
-        return participationRequestMapper.toFullDtoList(requestList);
+        return requestMapper.toFullDtoList(requestList);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         request.setStatus(CANCELED);
 
-        return participationRequestMapper.mapToParticipationRequestDto(request);
+        return requestMapper.mapToParticipationRequestDto(request);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Collection<ParticipationRequest> requests = repository.findByEvent(event);
         List<ParticipationRequest> requestList = new ArrayList<>(requests);
 
-        return participationRequestMapper.toFullDtoList(requestList);
+        return requestMapper.toFullDtoList(requestList);
     }
 
     @Override
@@ -154,18 +154,18 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 for (int i = 0; i < toProcess; i++) {
                     validRequests.get(i).setStatus(CONFIRMED);
                     eventRepository.incrementConfirmedRequestsIfWithinLimit(eventId);
-                    requestResult.getConfirmedRequests().add(participationRequestMapper.mapToParticipationRequestDto(validRequests.get(i)));
+                    requestResult.getConfirmedRequests().add(requestMapper.mapToParticipationRequestDto(validRequests.get(i)));
                 }
 
                 for (int i = toProcess; i < validRequests.size(); i++) {
                     validRequests.get(i).setStatus(REJECTED);
-                    requestResult.getRejectedRequests().add(participationRequestMapper.mapToParticipationRequestDto(validRequests.get(i)));
+                    requestResult.getRejectedRequests().add(requestMapper.mapToParticipationRequestDto(validRequests.get(i)));
                 }
                 break;
             case REJECTED:
                 for (int i = 0; i < validRequests.size(); i++) {
                     validRequests.get(i).setStatus(REJECTED);
-                    requestResult.getRejectedRequests().add(participationRequestMapper.mapToParticipationRequestDto(validRequests.get(i)));
+                    requestResult.getRejectedRequests().add(requestMapper.mapToParticipationRequestDto(validRequests.get(i)));
                 }
                 break;
             default:

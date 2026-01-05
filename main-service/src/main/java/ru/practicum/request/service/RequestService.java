@@ -6,7 +6,7 @@ import ru.practicum.request.dto.ParticipationRequestDto;
 
 import java.util.Collection;
 
-public interface ParticipationRequestService {
+public interface RequestService {
 
     ParticipationRequestDto saveRequest(Long userId, Long eventId);
 

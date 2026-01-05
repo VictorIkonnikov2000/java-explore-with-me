@@ -5,12 +5,12 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "participation_request")
-@Getter
-@Setter
+@Getter @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,19 +34,6 @@ public class ParticipationRequest {
     User requester;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     RequestStatus status;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ParticipationRequest)) return false;
-        return id != null && id.equals(((ParticipationRequest) o).getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
-

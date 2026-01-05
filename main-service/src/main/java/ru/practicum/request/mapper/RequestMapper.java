@@ -10,7 +10,7 @@ import java.util.List;
 import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
 
 @Mapper(componentModel = "spring")
-public interface ParticipationRequestMapper {
+public interface RequestMapper {
 
     @Mapping(target = "created", source = "request.created",
             dateFormat = DATE_TIME_FORMAT)

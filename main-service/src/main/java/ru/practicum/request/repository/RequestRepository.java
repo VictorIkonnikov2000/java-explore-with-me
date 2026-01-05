@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
+public interface RequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
     boolean existsByEventAndRequesterAndStatusNot(Event event, User requester, RequestStatus status);
 
