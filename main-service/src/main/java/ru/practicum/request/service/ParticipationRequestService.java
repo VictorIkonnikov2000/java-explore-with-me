@@ -35,7 +35,7 @@ public class ParticipationRequestService {
     private final UserRepository userRepository;
     private final ParticipationRequestMapper participationRequestMapper;
 
-    public ParticipationRequestDto saveRequest(Long userId, Long eventId) {
+    public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         if (eventId == null) {
             throw new BadRequestException("Идентификатор события не может быть пустым.");
         }

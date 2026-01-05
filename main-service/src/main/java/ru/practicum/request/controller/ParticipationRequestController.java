@@ -11,7 +11,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/users/{userId}/requests")
 @RequiredArgsConstructor
-public class RequestController {
+public class ParticipationRequestController {
 
     private final ParticipationRequestService participationRequestService;
 
@@ -19,7 +19,7 @@ public class RequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto create(@PathVariable Long userId,
                                           @RequestParam(required = false) Long eventId) {
-        return participationRequestService.saveRequest(userId, eventId);
+        return participationRequestService.addRequest(userId, eventId);
     }
 
     @GetMapping
