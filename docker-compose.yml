@@ -5,10 +5,10 @@ services:
     image: postgres:16.1-alpine
     container_name: stats-db
     environment:
-      # Параметры из вашего stats-server application.properties (PostgreSQL часть)
-      POSTGRES_DB: stat-db
-      POSTGRES_USER: stat-db
-      POSTGRES_PASSWORD: stat-db
+      # ВАЖНО: приводим к соответствию с stats-server application.properties
+      - POSTGRES_DB=stat-db
+      - POSTGRES_USER=stat-db
+      - POSTGRES_PASSWORD=stat-db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U stat-db -d stat-db"]
       interval: 5s
@@ -26,7 +26,7 @@ services:
       stats-db:
         condition: service_healthy
     environment:
-      # Работает через ${SPRING_DATASOURCE_URL:...} в вашем файле
+      # Ссылаемся на имя контейнера БД и базу stat-db
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stat-db
       - SPRING_DATASOURCE_USERNAME=stat-db
       - SPRING_DATASOURCE_PASSWORD=stat-db
@@ -35,10 +35,9 @@ services:
     image: postgres:16.1-alpine
     container_name: ewm-db
     environment:
-      # Стандартные настройки для main-db
-      POSTGRES_DB: main_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB=main_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d main_db"]
       interval: 5s
@@ -58,9 +57,9 @@ services:
       ewm-db:
         condition: service_healthy
     environment:
-      # Переопределяем H2 на PostgreSQL для работы в Docker
+      # Переопределяем H2 на Postgres для основного сервиса
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/main_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      # Подставляем URL сервера статистики
+      # Передаем URL сервера статистики (имя совпадает с ewm-stats-server)
       - STATS_SERVER_URL=http://ewm-stats-server:9090
