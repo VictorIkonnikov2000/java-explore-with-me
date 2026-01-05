@@ -20,7 +20,7 @@ public class EventMapper {
     private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
 
-    public EventShortDto mapToEventShortDto(Event event) {
+    public EventShortDto toEventShortDto(Event event) {
         if (event == null) return null;
 
         return EventShortDto.builder()
@@ -36,7 +36,7 @@ public class EventMapper {
                 .build();
     }
 
-    public Event mapToEvent(NewEventDto request) {
+    public Event toEvent(NewEventDto request) {
         if (request == null) return null;
 
         return Event.builder()
@@ -54,7 +54,7 @@ public class EventMapper {
                 .build();
     }
 
-    public EventFullDto mapToEventFullDto(Event event) {
+    public EventFullDto toEventFullDto(Event event) {
         if (event == null) return null;
 
         return EventFullDto.builder()
@@ -66,7 +66,7 @@ public class EventMapper {
                 .description(event.getDescription())
                 .eventDate(event.getEventDate())
                 .initiator(userMapper.toUserShortDto(event.getInitiator()))
-                .location(mapToLocationDto(event.getLocation()))
+                .location(toLocationDto(event.getLocation()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
@@ -105,11 +105,11 @@ public class EventMapper {
     }
 
     public List<EventFullDto> toFullDtoList(List<Event> eventList) {
-        return eventList.stream().map(this::mapToEventFullDto).collect(Collectors.toList());
+        return eventList.stream().map(this::toEventFullDto).collect(Collectors.toList());
     }
 
     public List<EventShortDto> toShortDtoList(List<Event> eventList) {
-        return eventList.stream().map(this::mapToEventShortDto).collect(Collectors.toList());
+        return eventList.stream().map(this::toEventShortDto).collect(Collectors.toList());
     }
 
     // Вспомогательные методы для Location (Embedded в Entity vs DTO)
@@ -121,7 +121,7 @@ public class EventMapper {
                 .build();
     }
 
-    private LocationDto mapToLocationDto(ru.practicum.event.model.Location location) {
+    private LocationDto toLocationDto(ru.practicum.event.model.Location location) {
         if (location == null) return null;
         return LocationDto.builder()
                 .lat(location.getLat())

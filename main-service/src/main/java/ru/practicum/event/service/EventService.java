@@ -54,7 +54,7 @@ public class EventService {
         checkEventDate(request.getEventDate());
         Category category = isContainsCategory(request.getCategory());
 
-        Event event = eventMapper.mapToEvent(request);
+        Event event = eventMapper.toEvent(request);
         event.setInitiator(user);
         event.setCategory(category);
         event.setCreatedOn(LocalDateTime.now());
@@ -62,7 +62,7 @@ public class EventService {
 
         Event saveEvent = repository.save(event);
 
-        return eventMapper.mapToEventFullDto(saveEvent);
+        return eventMapper.toEventFullDto(saveEvent);
     }
 
     public Collection<EventShortDto> getEventsUser(Long userId, int from, int size) {
@@ -77,7 +77,7 @@ public class EventService {
     public EventFullDto getEventUser(Long userId, Long eventId) {
         User user = isContainsUser(userId);
         Event event = checkEventForUserAffiliation(userId, eventId);
-        return eventMapper.mapToEventFullDto(event);
+        return eventMapper.toEventFullDto(event);
     }
 
     @Transactional
@@ -117,7 +117,7 @@ public class EventService {
             }
         }
 
-        return eventMapper.mapToEventFullDto(event);
+        return eventMapper.toEventFullDto(event);
     }
 
     public Collection<EventFullDto> getEventsForParameters(Collection<Long> users, Collection<EventState> states,
@@ -189,7 +189,7 @@ public class EventService {
             }
         }
 
-        return eventMapper.mapToEventFullDto(event);
+        return eventMapper.toEventFullDto(event);
     }
 
     @Transactional
@@ -212,7 +212,7 @@ public class EventService {
         Event event = eventOpt.get();
 
         Long views = loadViews(event, uri, true);
-        EventFullDto eventFullDto = eventMapper.mapToEventFullDto(event);
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
         eventFullDto.setViews(views);
 
         return eventFullDto;
@@ -324,7 +324,7 @@ public class EventService {
         Map<String, Long> finalViewsMap = viewsMap;
         return eventList.stream()
                 .map(event -> {
-                    EventFullDto dto = eventMapper.mapToEventFullDto(event);
+                    EventFullDto dto = eventMapper.toEventFullDto(event);
                     dto.setViews(finalViewsMap.getOrDefault(EVENT + event.getId(), 0L));
                     return dto;
                 })

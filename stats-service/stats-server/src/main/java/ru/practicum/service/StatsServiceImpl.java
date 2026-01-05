@@ -37,11 +37,8 @@ public class StatsServiceImpl implements StatsService {
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         log.info("Запрос статистики: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
 
-        // Валидация вынесена в отдельный блок (из старого кода, но с новыми исключениями)
         validateTimeRange(start, end);
 
-        // Логика выбора метода репозитория (из старого кода)
-        // Если список uris пуст или равен null, используем методы без фильтрации по списку
         if (unique) {
             if (uris == null || uris.isEmpty()) {
                 return endpointHitRepository.findUniqueStatsAll(start, end);
