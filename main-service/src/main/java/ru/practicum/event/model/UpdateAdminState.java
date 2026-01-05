@@ -1,6 +1,6 @@
 package ru.practicum.event.model;
 
-public enum UpdateAdminStateAction {
+public enum UpdateAdminState {
     PUBLISH_EVENT,
     REJECT_EVENT,
 }

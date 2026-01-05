@@ -18,7 +18,7 @@ import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
 @RequestMapping(path = "/events")
 @RequiredArgsConstructor
 @Validated
-public class EventController {
+public class PublicEventController {
 
     private final EventService eventService;
 

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import ru.practicum.event.model.UpdateUserStateAction;
+import ru.practicum.event.model.UpdateUserState;
 
 import java.time.LocalDateTime;
 
@@ -33,7 +33,7 @@ public class UpdateEventUserRequest {
     @Min(value = 0, message = "Лимит участников не может быть отрицательным")
     private Integer participantLimit;
     private Boolean requestModeration;
-    private UpdateUserStateAction stateAction;
+    private UpdateUserState stateAction;
     @Size(min = 3, max = 120, message = "Заголовок события должен быть от 3 до 120 символов")
     private String title;
 }
