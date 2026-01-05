@@ -2,64 +2,31 @@ version: '3.8'
 
 services:
   stats-db:
-    image: postgres:16.1-alpine
+    image: postgres:16.1
     container_name: stats-db
     environment:
-      # ВАЖНО: приводим к соответствию с stats-server application.properties
-      - POSTGRES_DB=stat-db
-      - POSTGRES_USER=stat-db
       - POSTGRES_PASSWORD=stat-db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U stat-db -d stat-db"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - POSTGRES_USER=stat-db
+      - POSTGRES_DB=stat-db
 
   stats-server:
-    build:
-      context: ./stats-service/stats-server
-      dockerfile: Dockerfile
+    build: ./stats-service/stats-server
     container_name: ewm-stats-server
     ports:
       - "9090:9090"
     depends_on:
-      stats-db:
-        condition: service_healthy
+      - stats-db
     environment:
-      # Ссылаемся на имя контейнера БД и базу stat-db
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stat-db
       - SPRING_DATASOURCE_USERNAME=stat-db
       - SPRING_DATASOURCE_PASSWORD=stat-db
 
-  ewm-db:
-    image: postgres:16.1-alpine
-    container_name: ewm-db
-    environment:
-      - POSTGRES_DB=main_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d main_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   ewm-service:
-    build:
-      context: ./main-service
-      dockerfile: Dockerfile
-    container_name: ewm-main-service
+    build: ./main-service
+    container_name: evm-main-service
     ports:
       - "8080:8080"
     depends_on:
-      stats-server:
-        condition: service_started
-      ewm-db:
-        condition: service_healthy
+      - stats-server
     environment:
-      # Переопределяем H2 на Postgres для основного сервиса
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/main_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-      # Передаем URL сервера статистики (имя совпадает с ewm-stats-server)
       - STATS_SERVER_URL=http://ewm-stats-server:9090
