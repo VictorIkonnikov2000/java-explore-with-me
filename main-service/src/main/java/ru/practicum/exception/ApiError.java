@@ -1,4 +1,4 @@
-package ru.practicum.error;
+package ru.practicum.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -1,4 +1,4 @@
-package ru.practicum.error;
+package ru.practicum.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -7,10 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.error.exceptions.BadRequestException;
-import ru.practicum.error.exceptions.ConflictException;
-import ru.practicum.error.exceptions.ForbiddenException;
-import ru.practicum.error.exceptions.NotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
