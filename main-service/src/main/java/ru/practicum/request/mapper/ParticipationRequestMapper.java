@@ -1,22 +1,36 @@
 package ru.practicum.request.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.model.ParticipationRequest;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static ru.practicum.constants.StandardDateTimeFormats.DATE_TIME_FORMAT;
+@Component
+public class ParticipationRequestMapper {
 
-@Mapper(componentModel = "spring")
-public interface ParticipationRequestMapper {
+    public ParticipationRequestDto toParticipationRequestDto(ParticipationRequest request) {
+        if (request == null) {
+            return null;
+        }
 
-    @Mapping(target = "created", source = "request.created",
-            dateFormat = DATE_TIME_FORMAT)
-    @Mapping(target = "event", source = "request.event.id")
-    @Mapping(target = "requester", source = "request.requester.id")
-    ParticipationRequestDto mapToParticipationRequestDto(ParticipationRequest request);
+        return ParticipationRequestDto.builder()
+                .id(request.getId())
+                .created(request.getCreated()) // Форматирование JSON произойдет через @JsonFormat в DTO
+                .event(request.getEvent() != null ? request.getEvent().getId() : null)
+                .requester(request.getRequester() != null ? request.getRequester().getId() : null)
+                .status(request.getStatus())
+                .build();
+    }
 
-    List<ParticipationRequestDto> toFullDtoList(List<ParticipationRequest> requests);
+    public List<ParticipationRequestDto> toFullDtoList(List<ParticipationRequest> requests) {
+        if (requests == null) {
+            return null;
+        }
+
+        return requests.stream()
+                .map(this::toParticipationRequestDto)
+                .collect(Collectors.toList());
+    }
 }

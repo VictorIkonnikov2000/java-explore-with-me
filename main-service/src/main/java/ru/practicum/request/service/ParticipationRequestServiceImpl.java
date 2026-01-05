@@ -75,7 +75,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         repository.save(request);
 
-        return participationRequestMapper.mapToParticipationRequestDto(request);
+        return participationRequestMapper.toParticipationRequestDto(request);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         request.setStatus(CANCELED);
 
-        return participationRequestMapper.mapToParticipationRequestDto(request);
+        return participationRequestMapper.toParticipationRequestDto(request);
     }
 
     @Override
@@ -154,18 +154,18 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 for (int i = 0; i < toProcess; i++) {
                     validRequests.get(i).setStatus(CONFIRMED);
                     eventRepository.incrementConfirmedRequestsIfWithinLimit(eventId);
-                    requestResult.getConfirmedRequests().add(participationRequestMapper.mapToParticipationRequestDto(validRequests.get(i)));
+                    requestResult.getConfirmedRequests().add(participationRequestMapper.toParticipationRequestDto(validRequests.get(i)));
                 }
 
                 for (int i = toProcess; i < validRequests.size(); i++) {
                     validRequests.get(i).setStatus(REJECTED);
-                    requestResult.getRejectedRequests().add(participationRequestMapper.mapToParticipationRequestDto(validRequests.get(i)));
+                    requestResult.getRejectedRequests().add(participationRequestMapper.toParticipationRequestDto(validRequests.get(i)));
                 }
                 break;
             case REJECTED:
                 for (int i = 0; i < validRequests.size(); i++) {
                     validRequests.get(i).setStatus(REJECTED);
-                    requestResult.getRejectedRequests().add(participationRequestMapper.mapToParticipationRequestDto(validRequests.get(i)));
+                    requestResult.getRejectedRequests().add(participationRequestMapper.toParticipationRequestDto(validRequests.get(i)));
                 }
                 break;
             default:
