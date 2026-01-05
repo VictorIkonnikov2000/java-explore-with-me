@@ -274,131 +274,79 @@ public class EventServiceImpl implements EventService {
 
     private Event checkEventForUserAffiliation(Long userId, Long eventId) {
         Event event = isContainsEvent(eventId);
-
         if (!event.getInitiator().getId().equals(userId)) {
-            throw new NotFoundException("Событие c eventId = " + eventId + " , пользователя с userId " + userId + " не найдено");
+            throw new NotFoundException("Событие не принадлежит указанному пользователю");
         }
-
         return event;
     }
 
     private Event isContainsEvent(Long id) {
-        Optional<Event> optEvent = repository.findById(id);
-
-        if (optEvent.isEmpty()) {
-            throw new NotFoundException("Событие с id: " + id + " в базе отсутствует");
-        }
-
-        return optEvent.get();
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
     }
 
     private User isContainsUser(Long id) {
-        Optional<User> optUser = userRepository.findById(id);
-
-        if (optUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + id + " в базе отсутствует");
-        }
-
-        return optUser.get();
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     private Category isContainsCategory(Long id) {
-        Optional<Category> optCategories = categoryRepository.findById(id);
-
-        if (optCategories.isEmpty()) {
-            throw new NotFoundException("Категория с id: " + id + " в базе отсутствует");
-        }
-
-        return optCategories.get();
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Категория не найдена"));
     }
 
     private void checkEventDate(LocalDateTime eventDate) {
-        LocalDateTime dateTime = LocalDateTime.now().plusHours(2);
-
-        if (eventDate.isBefore(dateTime)) {
-            throw new ConflictException("Событие должно быть запланировано не ранее чем за 2 часа до начала");
+        if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConflictException("Событие должно произойти не ранее чем через 2 часа");
         }
     }
 
     private void checkEventCanBeUpdated(Event event) {
-
-        if (event.getEventState() != CANCELED &&
-                event.getEventState() != PENDING) {
-            throw new ConflictException("Событие не удовлетворяет правилам редактирования");
+        if (event.getEventState() == PUBLISHED) {
+            throw new ConflictException("Опубликованное событие нельзя изменить");
         }
     }
 
     private void checkEventCanBeUpdatedAdmin(Event event) {
-
-        if (event.getPublishedOn() == null) {
-            return;
-        }
-
-        if (event.getEventDate().isBefore(event.getPublishedOn().plusHours(1))) {
-            throw new ConflictException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
+        if (event.getPublishedOn() != null &&
+                event.getEventDate().isBefore(event.getPublishedOn().plusHours(1))) {
+            throw new ConflictException("Дата события должна быть минимум на час позже публикации");
         }
     }
 
     private Long loadViews(Event event, String uri, boolean unique) {
-        List<ViewStatsDto> stats = statsClient.getStats(event.getPublishedOn(), LocalDateTime.now(),
-                List.of(uri), unique);
+        if (event.getPublishedOn() == null) return 0L;
 
-        Long views;
-
-        if (stats != null && !stats.isEmpty()) {
-            views = stats.get(0).getHits();
-        } else {
-            views = 0L;
-        }
-
-        return views;
+        List<ViewStatsDto> stats = statsClient.getStats(event.getPublishedOn(), LocalDateTime.now(), List.of(uri), unique);
+        return (stats != null && !stats.isEmpty()) ? stats.get(0).getHits() : 0L;
     }
 
     private List<EventFullDto> loadStatForList(List<Event> eventList, boolean unique) {
-
-        List<Event> publisherEvent = eventList.stream()
-                .filter(event -> event.getEventState() == PUBLISHED && event.getPublishedOn() != null)
+        List<Event> publishedEvents = eventList.stream()
+                .filter(e -> e.getEventState() == PUBLISHED && e.getPublishedOn() != null)
                 .toList();
 
-        List<String> uris = publisherEvent.stream()
-                .map(event -> EVENT + event.getId())
-                .toList();
+        Map<String, Long> viewsMap = new HashMap<>();
 
-        Optional<LocalDateTime> minPublished = publisherEvent.stream()
-                .map(Event::getPublishedOn)
-                .min(LocalDateTime::compareTo);
+        if (!publishedEvents.isEmpty()) {
+            LocalDateTime minPublished = publishedEvents.stream()
+                    .map(Event::getPublishedOn)
+                    .min(LocalDateTime::compareTo)
+                    .orElse(LocalDateTime.now().minusYears(1));
 
-        Map<String, Long> viewsEvents;
+            List<String> uris = publishedEvents.stream().map(e -> EVENT + e.getId()).toList();
+            List<ViewStatsDto> stats = statsClient.getStats(minPublished, LocalDateTime.now(), uris, unique);
 
-        if (!uris.isEmpty() && minPublished.isPresent()) {
-            List<ViewStatsDto> stats = statsClient.getStats(
-                    minPublished.get(),
-                    LocalDateTime.now(),
-                    uris,
-                    unique
-            );
-
-            viewsEvents = stats.stream()
-                    .collect(Collectors.toMap(
-                            ViewStatsDto::getUri,
-                            ViewStatsDto::getHits
-                    ));
-        } else {
-            viewsEvents = Map.of();
+            if (stats != null) {
+                viewsMap = stats.stream().collect(Collectors.toMap(ViewStatsDto::getUri, ViewStatsDto::getHits));
+            }
         }
 
+        Map<String, Long> finalViewsMap = viewsMap;
         return eventList.stream()
                 .map(event -> {
                     EventFullDto dto = eventMapper.mapToEventFullDto(event);
-
-                    if (event.getEventState() == PUBLISHED && event.getPublishedOn() != null) {
-                        String uri = EVENT + event.getId();
-                        Long views = viewsEvents.getOrDefault(uri, 0L);
-                        dto.setViews(views);
-                    } else {
-                        dto.setViews(0L);
-                    }
-
+                    dto.setViews(finalViewsMap.getOrDefault(EVENT + event.getId(), 0L));
                     return dto;
                 })
                 .collect(Collectors.toList());
