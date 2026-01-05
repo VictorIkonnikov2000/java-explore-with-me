@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 public interface EventService {
-    EventFullDto saveEvent(Long userId, NewEventDto request);
+    EventFullDto addEvent(Long userId, NewEventDto request);
 
     Collection<EventShortDto> getEventsUser(Long userId, int from, int size);
 

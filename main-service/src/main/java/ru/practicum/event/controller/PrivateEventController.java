@@ -31,7 +31,7 @@ public class PrivateEventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto create(@PathVariable Long userId,
                                @RequestBody @Valid NewEventDto request) {
-        return eventService.saveEvent(userId, request);
+        return eventService.addEvent(userId, request);
     }
 
     @GetMapping

@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto saveEvent(Long userId, NewEventDto request) {
+    public EventFullDto addEvent(Long userId, NewEventDto request) {
         User user = isContainsUser(userId);
 
         if (request == null) {
