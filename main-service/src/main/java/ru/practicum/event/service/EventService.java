@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.event.model.EventState.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,9 +47,11 @@ public class EventService {
 
     @Transactional
     public EventFullDto addEvent(Long userId, NewEventDto request) {
-        User user = isContainsUser(userId);
+        log.info("Добавление нового события пользователем с id={}", userId);
 
+        User user = isContainsUser(userId);
         if (request == null) {
+            log.error("Ошибка при добавлении события: запрос равен null для userId={}", userId);
             throw new BadRequestException("Запрос на добавление нового события не может быть null");
         }
 
@@ -61,20 +65,25 @@ public class EventService {
         event.setEventState(PENDING);
 
         Event saveEvent = repository.save(event);
+        log.info("Событие сохранено с id={}", saveEvent.getId());
 
         return eventMapper.toEventFullDto(saveEvent);
     }
 
     public Collection<EventShortDto> getEventsUser(Long userId, int from, int size) {
+        log.info("Получение списка событий пользователя с id={} (from={}, size={})", userId, from, size);
         User user = isContainsUser(userId);
 
         Pageable pageable = PageRequest.of(from / size, size);
         Page<Event> eventPage = repository.findByInitiator(user, pageable);
         List<Event> eventList = eventPage.getContent();
+
+        log.debug("Найдено {} событий для пользователя id={}", eventList.size(), userId);
         return eventMapper.toShortDtoList(eventList);
     }
 
     public EventFullDto getEventUser(Long userId, Long eventId) {
+        log.info("Получение полной информации о событии id={} для пользователя id={}", eventId, userId);
         User user = isContainsUser(userId);
         Event event = checkEventForUserAffiliation(userId, eventId);
         return eventMapper.toEventFullDto(event);
@@ -82,6 +91,7 @@ public class EventService {
 
     @Transactional
     public EventFullDto updateEventUser(Long userId, Long eventId, UpdateEventUserRequest request) {
+        log.info("Обновление события id={} пользователем id={}", eventId, userId);
         if (request == null) {
             throw new BadRequestException("Запрос на обновление события не может быть null");
         }
@@ -89,6 +99,7 @@ public class EventService {
         User user = isContainsUser(userId);
         Event event = checkEventForUserAffiliation(userId, eventId);
         checkEventCanBeUpdated(event);
+
         eventMapper.updateFromRequestUser(request, event);
 
         if (request.getCategory() != null) {
@@ -99,12 +110,14 @@ public class EventService {
         if (request.getEventDate() != null) {
             LocalDateTime dateTime = LocalDateTime.now().plusHours(2);
             if (request.getEventDate().isBefore(dateTime)) {
+                log.warn("Попытка установить некорректную дату события: id={}", eventId);
                 throw new ForbiddenException("Событие не удовлетворяет правилам редактирования");
             }
             event.setEventDate(request.getEventDate());
         }
 
         if (request.getStateAction() != null) {
+            log.info("Смена состояния события id={} на {}", eventId, request.getStateAction());
             switch (request.getStateAction()) {
                 case SEND_TO_REVIEW:
                     event.setEventState(PENDING);
@@ -112,8 +125,6 @@ public class EventService {
                 case CANCEL_REVIEW:
                     event.setEventState(CANCELED);
                     break;
-                default:
-                    throw new BadRequestException("Неизвестное значение: " + request.getStateAction());
             }
         }
 
@@ -123,69 +134,50 @@ public class EventService {
     public Collection<EventFullDto> getEventsForParameters(Collection<Long> users, Collection<EventState> states,
                                                            Collection<Long> categories, LocalDateTime rangeStart,
                                                            LocalDateTime rangeEnd, int from, int size) {
-        Collection<Long> usersId = (users == null || users.isEmpty()) ? null : users;
-        Collection<Long> categoriesId = (categories == null || categories.isEmpty()) ? null : categories;
-        Collection<EventState> stateValid = (states == null || states.isEmpty()) ? null : states;
+        log.info("Поиск событий администратором по фильтрам: users={}, states={}, categories={}", users, states, categories);
 
         if ((rangeStart != null && rangeEnd != null) && rangeStart.isAfter(rangeEnd)) {
             throw new BadRequestException("rangeStart не может быть позже rangeEnd");
         }
 
         Pageable pageable = PageRequest.of(from / size, size);
-        Page<Event> events = repository.findByParameters(usersId, stateValid, categoriesId,
-                rangeStart, rangeEnd, pageable);
+        Page<Event> events = repository.findByParameters(users, states, categories, rangeStart, rangeEnd, pageable);
 
-        List<Event> eventList = events.getContent();
-
-        return loadStatForList(eventList, true);
+        log.debug("Администратором найдено {} событий", events.getTotalElements());
+        return loadStatForList(events.getContent(), true);
     }
 
     @Transactional
     public EventFullDto eventUpdateAdmin(Long eventId, UpdateEventAdminRequest request) {
-        if (request == null) {
-            throw new BadRequestException("Запрос на обновление события не может быть null");
-        }
+        log.info("Обновление события id={} администратором", eventId);
         Event event = isContainsEvent(eventId);
 
         eventMapper.updateFromRequestAdmin(request, event);
 
         if (request.getCategory() != null) {
-            Category category = isContainsCategory(request.getCategory());
-            event.setCategory(category);
-        }
-
-        if (request.getEventDate() != null) {
-            event.setEventDate(request.getEventDate());
-        }
-
-        if (event.getPublishedOn() != null && request.getEventDate() != null) {
-            checkEventCanBeUpdatedAdmin(event);
+            event.setCategory(isContainsCategory(request.getCategory()));
         }
 
         if (request.getStateAction() != null) {
+            log.info("Действие администратора {} для события id={}", request.getStateAction(), eventId);
             switch (request.getStateAction()) {
                 case PUBLISH_EVENT:
                     if (event.getEventState() != PENDING) {
-                        throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
+                        throw new ConflictException("Событие можно публиковать только в состоянии ожидания");
                     }
-
                     LocalDateTime minEventDate = LocalDateTime.now().plusHours(1);
                     if (event.getEventDate().isBefore(minEventDate)) {
                         throw new ConflictException("Событие должно начинаться не ранее чем через 1 час");
                     }
-
                     event.setPublishedOn(LocalDateTime.now());
                     event.setEventState(PUBLISHED);
                     break;
                 case REJECT_EVENT:
                     if (event.getEventState() == PUBLISHED) {
-                        throw new ConflictException("Событие можно отклонить, только если оно не опубликовано");
+                        throw new ConflictException("Нельзя отклонить опубликованное событие");
                     }
-
                     event.setEventState(CANCELED);
                     break;
-                default:
-                    throw new BadRequestException("Неизвестное значение: " + request.getStateAction());
             }
         }
 
@@ -194,23 +186,18 @@ public class EventService {
 
     @Transactional
     public EventFullDto getEvent(Long eventId, HttpServletRequest servletRequest) {
+        log.info("Публичный просмотр события id={}, IP={}", eventId, servletRequest.getRemoteAddr());
+
         Optional<Event> eventOpt = repository.findByIdAndEventState(eventId, PUBLISHED);
         if (eventOpt.isEmpty()) {
+            log.warn("Событие id={} не найдено или не опубликовано", eventId);
             throw new NotFoundException("Событие с id " + eventId + " не найдено");
         }
 
         String uri = EVENT + eventId;
+        sendHit(servletRequest, uri); // Вынес логику отправки в статистику для чистоты
 
-        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
-                .app("ewm-main-service")
-                .uri(uri)
-                .ip(servletRequest.getRemoteAddr())
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        statsClient.hit(endpointHitDto);
         Event event = eventOpt.get();
-
         Long views = loadViews(event, uri, true);
         EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
         eventFullDto.setViews(views);
@@ -221,25 +208,19 @@ public class EventService {
     public Collection<EventFullDto> getEventsPublic(String text, Collection<Long> categories, Boolean paid,
                                                     LocalDateTime rangeStart, LocalDateTime rangeEnd, boolean onlyAvailable,
                                                     String sort, int from, int size, HttpServletRequest request) {
+        log.info("Публичный поиск событий по тексту: '{}'", text);
+
         if ((rangeStart != null && rangeEnd != null) && rangeEnd.isBefore(rangeStart)) {
             throw new BadRequestException("Дата окончания не может быть раньше даты начала");
         }
 
-        Collection<Long> categoryId = (categories != null && !categories.isEmpty()) ? categories : null;
-        LocalDateTime dataTime = (rangeStart == null) ? LocalDateTime.now() : rangeStart;
+        sendHit(request, request.getRequestURI());
 
+        LocalDateTime dataTime = (rangeStart == null) ? LocalDateTime.now() : rangeStart;
         Pageable pageable = PageRequest.of(from / size, size);
-        Page<Event> eventPage = repository.findByParametersForPublicController(text, categoryId, dataTime,
+        Page<Event> eventPage = repository.findByParametersForPublicController(text, categories, dataTime,
                 rangeEnd, paid, onlyAvailable, pageable);
 
-        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
-                .app("ewm-main-service")
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        statsClient.hit(endpointHitDto);
         List<EventFullDto> eventFullDtoList = loadStatForList(eventPage.getContent(), true);
 
         if ("VIEWS".equals(sort)) {
@@ -250,6 +231,18 @@ public class EventService {
 
         return eventFullDtoList;
     }
+
+    private void sendHit(HttpServletRequest request, String uri) {
+        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+                .app("ewm-main-service")
+                .uri(uri)
+                .ip(request.getRemoteAddr())
+                .timestamp(LocalDateTime.now())
+                .build();
+        statsClient.hit(endpointHitDto);
+        log.debug("Отправлена статистика просмотра: URI={}, IP={}", uri, request.getRemoteAddr());
+    }
+
 
     private Event checkEventForUserAffiliation(Long userId, Long eventId) {
         Event event = isContainsEvent(eventId);
