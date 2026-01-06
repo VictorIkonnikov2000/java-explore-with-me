@@ -33,4 +33,3 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             @Param("requestIds") Set<Long> requestIds,
             @Param("eventId") Long eventId,
             @Param("status") RequestStatus status);
-}
