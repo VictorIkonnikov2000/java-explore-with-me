@@ -15,8 +15,6 @@ import java.util.Set;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
-    boolean existsByEventAndRequesterAndStatusNot(Event event, User requester, RequestStatus status);
-
     Collection<ParticipationRequest> findByRequester(User requester);
 
     Optional<ParticipationRequest> findByIdAndRequester(Long id, User requester);
@@ -33,3 +31,6 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             @Param("requestIds") Set<Long> requestIds,
             @Param("eventId") Long eventId,
             @Param("status") RequestStatus status);
+
+    boolean existsByEventAndRequesterAndStatusNot(Event event, User requester, RequestStatus status);
+}
