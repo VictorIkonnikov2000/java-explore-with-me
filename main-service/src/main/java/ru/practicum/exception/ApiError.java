@@ -18,7 +18,7 @@ import static ru.practicum.constans.StandardDateTimeFormats.DATE_TIME_FORMAT;
 public class ApiError {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     private LocalDateTime timestamp;
-    private String status; // Обычно хранят HttpStatus (name), либо переименовывают в "code"
+    private String status;
     private String reason;
     private String message;
     private List<String> errors;
