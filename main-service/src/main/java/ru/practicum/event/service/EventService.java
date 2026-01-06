@@ -49,14 +49,14 @@ public class EventService {
     public EventFullDto addEvent(Long userId, NewEventDto request) {
         log.info("Добавление нового события пользователем с id={}", userId);
 
-        User user = containsUser(userId);
+        User user = getUserOrThrow(userId);
         if (request == null) {
             log.error("Ошибка при добавлении события: запрос равен null для userId={}", userId);
             throw new BadRequestException("Запрос на добавление нового события не может быть null");
         }
 
-        checkEventDate(request.getEventDate());
-        Category category = containsCategory(request.getCategory());
+        validateEventTime(request.getEventDate());
+        Category category = getCategoryOrThrow(request.getCategory());
 
         Event event = eventMapper.toEvent(request);
         event.setInitiator(user);
@@ -72,7 +72,7 @@ public class EventService {
 
     public Collection<EventShortDto> getEventsUser(Long userId, int from, int size) {
         log.info("Получение списка событий пользователя с id={} (from={}, size={})", userId, from, size);
-        User user = containsUser(userId);
+        User user = getUserOrThrow(userId);
 
         Pageable pageable = PageRequest.of(from / size, size);
         Page<Event> eventPage = repository.findByInitiator(user, pageable);
@@ -84,8 +84,8 @@ public class EventService {
 
     public EventFullDto getEventUser(Long userId, Long eventId) {
         log.info("Получение полной информации о событии id={} для пользователя id={}", eventId, userId);
-        User user = containsUser(userId);
-        Event event = checkEventForUserAffiliation(userId, eventId);
+        User user = getUserOrThrow(userId);
+        Event event = getEventIfBelongsToUser(userId, eventId);
         return eventMapper.toEventFullDto(event);
     }
 
@@ -96,14 +96,14 @@ public class EventService {
             throw new BadRequestException("Запрос на обновление события не может быть null");
         }
 
-        User user = containsUser(userId);
-        Event event = checkEventForUserAffiliation(userId, eventId);
-        checkEventCanBeUpdated(event);
+        User user = getUserOrThrow(userId);
+        Event event = getEventIfBelongsToUser(userId, eventId);
+        ensureEventIsPending(event);
 
         eventMapper.updateFromRequestUser(request, event);
 
         if (request.getCategory() != null) {
-            Category category = containsCategory(request.getCategory());
+            Category category = getCategoryOrThrow(request.getCategory());
             event.setCategory(category);
         }
 
@@ -150,12 +150,12 @@ public class EventService {
     @Transactional
     public EventFullDto eventUpdateAdmin(Long eventId, UpdateEventAdminRequest request) {
         log.info("Обновление события id={} администратором", eventId);
-        Event event = containsEvent(eventId);
+        Event event = getEventOrThrow(eventId);
 
         eventMapper.updateFromRequestAdmin(request, event);
 
         if (request.getCategory() != null) {
-            event.setCategory(containsCategory(request.getCategory()));
+            event.setCategory(getCategoryOrThrow(request.getCategory()));
         }
 
         if (request.getStateAction() != null) {
@@ -244,36 +244,36 @@ public class EventService {
     }
 
 
-    private Event checkEventForUserAffiliation(Long userId, Long eventId) {
-        Event event = containsEvent(eventId);
+    private Event getEventIfBelongsToUser(Long userId, Long eventId) {
+        Event event = getEventOrThrow(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new NotFoundException("Событие не принадлежит указанному пользователю");
         }
         return event;
     }
 
-    private Event containsEvent(Long id) {
+    private Event getEventOrThrow(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Событие не найдено"));
     }
 
-    private User containsUser(Long id) {
+    private User getUserOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
-    private Category containsCategory(Long id) {
+    private Category getCategoryOrThrow(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Категория не найдена"));
     }
 
-    private void checkEventDate(LocalDateTime eventDate) {
+    private void validateEventTime(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ConflictException("Событие должно произойти не ранее чем через 2 часа");
         }
     }
 
-    private void checkEventCanBeUpdated(Event event) {
+    private void ensureEventIsPending(Event event) {
         if (event.getEventState() == PUBLISHED) {
             throw new ConflictException("Опубликованное событие нельзя изменить");
         }
