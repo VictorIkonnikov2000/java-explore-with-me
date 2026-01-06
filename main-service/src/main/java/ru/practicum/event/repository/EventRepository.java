@@ -21,8 +21,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Page<Event> findByInitiator(User initiator, Pageable pageable);
 
-    Optional<Event> findByIdAndInitiator(Long id, User initiator);
-
     Optional<Event> findByIdAndEventState(Long id, EventState eventState);
 
     boolean existsByCategory(Category category);
@@ -45,17 +43,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("rangeEnd") LocalDateTime rangeEnd,
             Pageable pageable);
 
-    @Modifying
-    @Query("UPDATE Event e SET e.confirmedRequests = COALESCE(e.confirmedRequests, 0) + 1 " +
-            "WHERE e.id = :eventId " +
-            "AND (e.participantLimit = 0 OR e.confirmedRequests < e.participantLimit)")
-    int incrementConfirmedRequestsIfWithinLimit(@Param("eventId") Long eventId);
-
-    @Modifying
-    @Query("UPDATE Event e SET e.confirmedRequests = GREATEST(COALESCE(e.confirmedRequests, 1) - 1, 0) " +
-            "WHERE e.id = :eventId")
-    void decrementConfirmedRequests(@Param("eventId") Long eventId);
-
     @Query("SELECT DISTINCT e FROM Event e " +
             "LEFT JOIN FETCH e.category " +
             "LEFT JOIN FETCH e.initiator " +
@@ -76,4 +63,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("paid") Boolean paid,
             @Param("onlyAvailable") boolean onlyAvailable,
             Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Event e SET e.confirmedRequests = COALESCE(e.confirmedRequests, 0) + 1 " +
+            "WHERE e.id = :eventId " +
+            "AND (e.participantLimit = 0 OR e.confirmedRequests < e.participantLimit)")
+    int incrementConfirmedRequestsIfWithinLimit(@Param("eventId") Long eventId);
+
+    @Modifying
+    @Query("UPDATE Event e SET e.confirmedRequests = GREATEST(COALESCE(e.confirmedRequests, 1) - 1, 0) " +
+            "WHERE e.id = :eventId")
+    void decrementConfirmedRequests(@Param("eventId") Long eventId);
 }
