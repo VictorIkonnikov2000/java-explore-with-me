@@ -70,7 +70,8 @@ public class ParticipationRequestService {
             throw new ConflictException("Лимит участников данного события исчерпан.");
         }
 
-        if (repository.existsByEventAndRequesterAndStatusNot(event, user, CANCELED)) {
+        // Обновленный метод: проверка по ID
+        if (repository.existsByEventIdAndRequesterIdAndStatusNot(eventId, userId, CANCELED)) {
             log.warn("Конфликт: дубликат заявки от пользователя id={} на событие id={}", userId, eventId);
             throw new ConflictException("Запрос от данного пользователя уже существует.");
         }
@@ -98,20 +99,21 @@ public class ParticipationRequestService {
     @Transactional(readOnly = true)
     public Collection<ParticipationRequestDto> getRequests(Long userId) {
         log.info("Получение всех заявок пользователя id={}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден.");
+        }
 
-        return repository.findByRequester(user).stream()
+        // Обновленный метод: findAllByRequesterId
+        return repository.findAllByRequesterId(userId).stream()
                 .map(participationRequestMapper::toParticipationRequestDto)
                 .collect(Collectors.toList());
     }
 
     public ParticipationRequestDto requestUpdate(Long userId, Long requestId) {
         log.info("Отмена заявки id={} пользователем id={}", requestId, userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден."));
 
-        ParticipationRequest request = repository.findByIdAndRequester(requestId, user)
+        // Обновленный метод: findByIdAndRequesterId
+        ParticipationRequest request = repository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> {
                     log.warn("Заявка id={} не найдена для пользователя id={}", requestId, userId);
                     return new NotFoundException("Запрос с id=" + requestId + " не найден для данного пользователя.");
@@ -129,16 +131,20 @@ public class ParticipationRequestService {
     @Transactional(readOnly = true)
     public Collection<ParticipationRequestDto> getRequestUser(Long userId, Long eventId) {
         log.info("Получение заявок на событие id={} владельцем id={}", eventId, userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден."));
 
-        Event event = eventRepository.findByIdAndInitiator(eventId, user)
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено у пользователя " + userId));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено."));
 
-        return repository.findByEvent(event).stream()
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new NotFoundException("Событие с id=" + eventId + " не найдено у пользователя " + userId);
+        }
+
+        // Обновленный метод: findAllByEventId
+        return repository.findAllByEventId(eventId).stream()
                 .map(participationRequestMapper::toParticipationRequestDto)
                 .collect(Collectors.toList());
     }
+
 
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest request) {
@@ -147,11 +153,12 @@ public class ParticipationRequestService {
         }
         log.info("Массовое обновление статуса заявок для события id={}: статус={}", eventId, request.getStatus());
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден."));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено."));
 
-        Event event = eventRepository.findByIdAndInitiator(eventId, user)
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено у текущего пользователя."));
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new NotFoundException("Событие не принадлежит пользователю id=" + userId);
+        }
 
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             log.warn("Попытка модерации события id={}, где она не требуется", eventId);
@@ -168,11 +175,11 @@ public class ParticipationRequestService {
         if (request.getRequestIds() != null && !request.getRequestIds().isEmpty()) {
             validRequests = repository.findValidRequestsForEvent(request.getRequestIds(), eventId, PENDING);
         } else {
-            validRequests = repository.findByEventIdAndStatus(eventId, PENDING);
+            // Обновленный метод: findAllByEventIdAndStatus
+            validRequests = repository.findAllByEventIdAndStatus(eventId, PENDING);
         }
 
         long availableSeats = event.getParticipantLimit() - event.getConfirmedRequests();
-        log.debug("Доступно мест для события id={}: {}", eventId, availableSeats);
 
         if (request.getStatus() == REJECTED) {
             validRequests.forEach(req -> {
@@ -192,13 +199,11 @@ public class ParticipationRequestService {
                 }
             }
         } else {
-            log.error("Указан некорректный статус для обновления: {}", request.getStatus());
             throw new BadRequestException("Указан некорректный статус: " + request.getStatus());
         }
 
         repository.saveAll(validRequests);
-        log.info("Результат обновления: {} подтверждено, {} отклонено",
-                requestResult.getConfirmedRequests().size(), requestResult.getRejectedRequests().size());
         return requestResult;
     }
 }
+

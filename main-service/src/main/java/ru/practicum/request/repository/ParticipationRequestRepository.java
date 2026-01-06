@@ -15,13 +15,17 @@ import java.util.Set;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
-    Collection<ParticipationRequest> findByRequester(User requester);
+    @Query("SELECT r FROM ParticipationRequest r WHERE r.requester.id = :userId")
+    List<ParticipationRequest> findAllByRequesterId(@Param("userId") Long userId);
 
-    Optional<ParticipationRequest> findByIdAndRequester(Long id, User requester);
+    @Query("SELECT r FROM ParticipationRequest r WHERE r.id = :id AND r.requester.id = :userId")
+    Optional<ParticipationRequest> findByIdAndRequesterId(@Param("id") Long id, @Param("userId") Long userId);
 
-    Collection<ParticipationRequest> findByEvent(Event event);
+    @Query("SELECT r FROM ParticipationRequest r WHERE r.event.id = :eventId")
+    List<ParticipationRequest> findAllByEventId(@Param("eventId") Long eventId);
 
-    List<ParticipationRequest> findByEventIdAndStatus(Long eventId, RequestStatus status);
+    @Query("SELECT r FROM ParticipationRequest r WHERE r.event.id = :eventId AND r.status = :status")
+    List<ParticipationRequest> findAllByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") RequestStatus status);
 
     @Query("SELECT r FROM ParticipationRequest r " +
             "WHERE r.id IN :requestIds " +
@@ -32,5 +36,11 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             @Param("eventId") Long eventId,
             @Param("status") RequestStatus status);
 
-    boolean existsByEventAndRequesterAndStatusNot(Event event, User requester, RequestStatus status);
+    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM ParticipationRequest r " +
+            "WHERE r.event.id = :eventId AND r.requester.id = :userId AND r.status <> :status")
+    boolean existsByEventIdAndRequesterIdAndStatusNot(
+            @Param("eventId") Long eventId,
+            @Param("userId") Long userId,
+            @Param("status") RequestStatus status);
 }
+
