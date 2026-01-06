@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.constans.ErrorReasons.*;
+import static ru.practicum.constans.ErrorMessages.*;
 
 @RestControllerAdvice
 @Slf4j
