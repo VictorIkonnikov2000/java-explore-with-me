@@ -2,10 +2,11 @@ package ru.practicum.category.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,16 +19,4 @@ public class Category {
     @Column(name = "name", unique = true, nullable = false, length = 50)
     private String name;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Category category = (Category) o;
-        return id != null && Objects.equals(id, category.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

@@ -2,6 +2,7 @@ package ru.practicum.event.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Hibernate;
 import ru.practicum.category.model.Category;
 import ru.practicum.user.model.User;
 
@@ -68,7 +69,7 @@ public class Event {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Event event = (Event) o;
         return id != null && Objects.equals(id, event.id);
     }
@@ -78,4 +79,3 @@ public class Event {
         return getClass().hashCode();
     }
 }
-

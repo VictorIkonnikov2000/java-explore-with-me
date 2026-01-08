@@ -2,6 +2,7 @@ package ru.practicum.compilation.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Hibernate;
 import ru.practicum.event.model.Event;
 
 import java.util.HashSet;
@@ -37,7 +38,7 @@ public class Compilation {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Compilation that = (Compilation) o;
         return id != null && Objects.equals(id, that.id);
     }
