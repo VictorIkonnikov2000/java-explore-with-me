@@ -184,7 +184,7 @@ public class EventService {
         return eventMapper.toEventFullDto(repository.save(event));
     }
 
-    @Transactional
+
     public EventFullDto getEvent(Long eventId, HttpServletRequest servletRequest) {
         log.info("Публичный просмотр события id={}, IP={}", eventId, servletRequest.getRemoteAddr());
 
