@@ -96,7 +96,7 @@ public class CompilationService {
             }
         }
 
-        return compilationMapper.toCompilationDto(compilation);
+        return compilationMapper.toCompilationDto(repository.save(compilation));
     }
 
     @Transactional(readOnly = true)
