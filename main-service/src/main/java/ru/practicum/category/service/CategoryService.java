@@ -74,7 +74,7 @@ public class CategoryService {
             category.setName(newName);
         }
 
-        return categoryMapper.toCategoryDto(category);
+        return categoryMapper.toCategoryDto(repository.save(category));
     }
 
     @Transactional(readOnly = true)
