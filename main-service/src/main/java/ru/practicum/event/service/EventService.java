@@ -128,7 +128,7 @@ public class EventService {
             }
         }
 
-        return eventMapper.toEventFullDto(event);
+        return eventMapper.toEventFullDto(repository.save(event));
     }
 
     public Collection<EventFullDto> getEventsForParameters(Collection<Long> users, Collection<EventState> states,
@@ -181,7 +181,7 @@ public class EventService {
             }
         }
 
-        return eventMapper.toEventFullDto(event);
+        return eventMapper.toEventFullDto(repository.save(event));
     }
 
     @Transactional
