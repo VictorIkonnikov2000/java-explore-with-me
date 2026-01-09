@@ -41,6 +41,7 @@ public class CommentController {
         CommentDto comment = commentService.getCommentById(commentId);
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
+
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long eventId,
@@ -49,6 +50,7 @@ public class CommentController {
         commentService.deleteComment(commentId, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentDto> updateComment(
             @PathVariable Long eventId,
