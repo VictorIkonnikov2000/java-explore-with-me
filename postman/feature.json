@@ -21,6 +21,10 @@
                   "// Хелпер для асинхронных запросов\r",
                   "const send = (opts) => new Promise((res, rej) => pm.sendRequest(opts, (err, r) => err ? rej(err) : res(r.json())));\r",
                   "\r",
+                  "pm.variables.unset('eventId');\r",
+                  "pm.variables.unset('authorId');\r",
+                  "pm.variables.unset('lastCommentId');\r",
+                  "\r",
                   "const setup = async () => {\r",
                   "    try {\r",
                   "        // 1. Создание пользователя\r",
@@ -103,9 +107,19 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
+                  "const baseUrl = 'http://localhost:8080';\r",
                   "const authorId = pm.variables.get('authorId');\r",
+                  "const eventId = pm.variables.get('eventId');\r",
+                  "const commentId = pm.variables.get('lastCommentId');\r",
+                  "\r",
+                  "if (!authorId || !eventId || !commentId) {\r",
+                  "    console.error('authorId, eventId, or commentId is not defined');\r",
+                  "    pm.test('Setup failed: missing variables', () => pm.expect.fail('Missing variables'));\r",
+                  "} else {\r",
+                  "pm.request.url = `${baseUrl}/events/${eventId}/comments/${commentId}`;\r",
                   "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Обновленный текст комментария\" }) });"
+                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Обновленный текст комментария\" }) });\r",
+                  "}\r"
                 ],
                 "type": "text/javascript"
               }
@@ -138,8 +152,17 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: pm.variables.get('authorId').toString()});\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"\" }) });"
+                  "const baseUrl = 'http://localhost:8080';\r",
+                  "const eventId = pm.variables.get('eventId');\r",
+                  "const authorId = pm.variables.get('authorId');\r",
+                  "if (!eventId || !authorId) {\r",
+                  "    console.error('eventId or authorId is not defined');\r",
+                  "    pm.test('Setup failed: missing variables', () => pm.expect.fail('Missing variables'));\r",
+                  "} else {\r",
+                  "pm.request.url = `${baseUrl}/events/${eventId}/comments`;\r",
+                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});\r",
+                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"\" }) });\r",
+                  "}\r"
                 ],
                 "type": "text/javascript"
               }
@@ -166,19 +189,29 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
+                  "const baseUrl = 'http://localhost:8080';\r",
                   "const setupStranger = () => {\r",
                   "    pm.sendRequest({\r",
-                  "        url: 'http://localhost:8080/admin/users',\r",
+                  "        url: `${baseUrl}/admin/users`,\r",
                   "        method: 'POST',\r",
                   "        header: { 'Content-Type': 'application/json' },\r",
                   "        body: { mode: 'raw', raw: JSON.stringify({ name: 'Stranger', email: `stranger${Date.now()}@test.ru` }) }\r",
                   "    }, (err, res) => {\r",
                   "        pm.variables.set('strangerId', res.json().id);\r",
+                  "        const eventId = pm.variables.get('eventId');\r",
+                  "        const commentId = pm.variables.get('lastCommentId');\r",
+                  "        \r",
+                  "         if (!eventId || !commentId) {\r",
+                  "           console.error('eventId or commentId is not defined');\r",
+                  "              pm.test('Setup failed: missing variables', () => pm.expect.fail('Missing variables'));\r",
+                  "            } else {\r",
+                  "              pm.request.url = `${baseUrl}/events/${eventId}/comments/${commentId}`;\r",
+                  "              pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: (pm.variables.get('strangerId') || 999).toString()});\r",
+                  "              pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Я чужой\" }) });\r",
+                  "        }\r",
                   "    });\r",
                   "};\r",
-                  "setupStranger();\r",
-                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: (pm.variables.get('strangerId') || 999).toString()});\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Я чужой\" }) });"
+                  "setupStranger();\r"
                 ],
                 "type": "text/javascript"
               }
@@ -187,8 +220,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Статус 400 - Not the author\", () => {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([400, 403, 409]);\r",
+                  "pm.test(\"Статус должен быть 403 (Forbidden)\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([403, 400]);\r",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -203,6 +236,24 @@
         {
           "name": "Delete comment - Not Found",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const baseUrl = 'http://localhost:8080';\r",
+                  "const authorId = pm.variables.get('authorId');\r",
+                  "const eventId = pm.variables.get('eventId');\r",
+                  "if (!eventId || !authorId) {\r",
+                  "    console.error('eventId or authorId is not defined');\r",
+                  "    pm.test('Setup failed: missing variables', () => pm.expect.fail('Missing variables'));\r",
+                  "} else {\r",
+                  "pm.request.url = `${baseUrl}/events/${eventId}/comments/999999`;\r",
+                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});\r",
+                  " }\r"
+                ],
+                "type": "text/javascript"
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -230,6 +281,25 @@
           "name": "Delete comment - Success",
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const baseUrl = 'http://localhost:8080';\r",
+                  "   const authorId = pm.variables.get('authorId');\r",
+                  "const eventId = pm.variables.get('eventId');\r",
+                  "const commentId = pm.variables.get('lastCommentId');\r",
+                  "if (!eventId || !authorId || !commentId) {\r",
+                  "    console.error('eventId, authorId or commentId is not defined');\r",
+                  "    pm.test('Setup failed: missing variables', () => pm.expect.fail('Missing variables'));\r",
+                  "} else {\r",
+                  " pm.request.url = `${baseUrl}/events/${eventId}/comments/${commentId}`;\r",
+                  "     pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});\r",
+                  "}\r"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "exec": [
@@ -253,3 +323,4 @@
     }
   ]
 }
+
