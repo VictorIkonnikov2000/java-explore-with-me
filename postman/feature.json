@@ -1,0 +1,212 @@
+{
+  "info": {
+    "_postman_id": "comment-api-tests-dynamic-2024",
+    "name": "EWM Comment API tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Positive Tests",
+      "item": [
+        {
+          "name": "Add comment - Success",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const main = async () => {\r",
+                  "    const api = new API(pm);\r",
+                  "    const rnd = new RandomUtils();\r",
+                  "    try {\r",
+                  "        const user = await api.addUser(rnd.getUser());\r",
+                  "        const category = await api.addCategory(rnd.getCategory());\r",
+                  "        let event = await api.addEvent(user.id, rnd.getEvent(category.id));\r",
+                  "        event = await api.publishEvent(event.id);\r",
+                  "\r",
+                  "        pm.variables.set('eventId', event.id);\r",
+                  "        pm.variables.set('authorId', user.id);\r",
+                  "\r",
+                  "        let body = { \"text\": \"Это тестовый комментарий к событию\" };\r",
+                  "        pm.request.body.update({ mode: 'raw', raw: JSON.stringify(body) });\r",
+                  "        pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: user.id.toString()});\r",
+                  "        pm.request.url = pm.variables.replaceIn(`http://localhost:8080/events/${event.id}/comments`);\r",
+                  "    } catch(err) { console.error(err); }\r",
+                  "};\r",
+                  "setTimeout(main, 100);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 201 Created\", () => pm.response.to.have.status(201));\r",
+                  "const res = pm.response.json();\r",
+                  "pm.variables.set(\"lastCommentId\", res.id);\r",
+                  "pm.test(\"Текст комментария совпадает\", () => pm.expect(res.text).to.eql(\"Это тестовый комментарий к событию\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments" }
+          }
+        },
+        {
+          "name": "Update comment - Success",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const authorId = pm.variables.get('authorId');\r",
+                  "const body = { \"text\": \"Обновленный текст комментария\" };\r",
+                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify(body) });\r",
+                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 200 OK\", () => pm.response.to.have.status(200));\r",
+                  "pm.test(\"Текст обновлен\", () => pm.expect(pm.response.json().text).to.eql(\"Обновленный текст комментария\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/{{lastCommentId}}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Add comment - Empty Text (Validation)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"\" }) });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 400 - Validation failed\", () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments" }
+          }
+        },
+        {
+          "name": "Update comment - Not Author (Forbidden)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const main = async () => {\r",
+                  "    const api = new API(pm);\r",
+                  "    const rnd = new RandomUtils();\r",
+                  "    const stranger = await api.addUser(rnd.getUser());\r",
+                  "    pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: stranger.id.toString()});\r",
+                  "    pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Я чужой\" }) });\r",
+                  "};\r",
+                  "setTimeout(main, 100);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 400 - User is not the author\", () => {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"not the author\");\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/{{lastCommentId}}" }
+          }
+        },
+        {
+          "name": "Delete comment - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 404 - Comment does not exist\", () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-Sharer-User-Id", "value": "{{authorId}}" }
+            ],
+            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/999999" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete comment - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 204 No Content\", () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-Sharer-User-Id", "value": "{{authorId}}" }
+            ],
+            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/{{lastCommentId}}" }
+          }
+        }
+      ]
+    }
+  ]
+}
