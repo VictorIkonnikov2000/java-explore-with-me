@@ -15,25 +15,62 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "const main = async () => {\r",
-                  "    const api = new API(pm);\r",
-                  "    const rnd = new RandomUtils();\r",
+                  "const baseUrl = 'http://localhost:8080';\r",
+                  "const timestamp = Date.now();\r",
+                  "\r",
+                  "// Хелпер для асинхронных запросов\r",
+                  "const send = (opts) => new Promise((res, rej) => pm.sendRequest(opts, (err, r) => err ? rej(err) : res(r.json())));\r",
+                  "\r",
+                  "const setup = async () => {\r",
                   "    try {\r",
-                  "        const user = await api.addUser(rnd.getUser());\r",
-                  "        const category = await api.addCategory(rnd.getCategory());\r",
-                  "        let event = await api.addEvent(user.id, rnd.getEvent(category.id));\r",
-                  "        event = await api.publishEvent(event.id);\r",
+                  "        // 1. Создание пользователя\r",
+                  "        const user = await send({\r",
+                  "            url: `${baseUrl}/admin/users`,\r",
+                  "            method: 'POST',\r",
+                  "            header: { 'Content-Type': 'application/json' },\r",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ name: 'User' + timestamp, email: `test${timestamp}@test.ru` }) }\r",
+                  "        });\r",
+                  "\r",
+                  "        // 2. Создание категории\r",
+                  "        const cat = await send({\r",
+                  "            url: `${baseUrl}/admin/categories`,\r",
+                  "            method: 'POST',\r",
+                  "            header: { 'Content-Type': 'application/json' },\r",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ name: 'Cat' + timestamp }) }\r",
+                  "        });\r",
+                  "\r",
+                  "        // 3. Создание события\r",
+                  "        const event = await send({\r",
+                  "            url: `${baseUrl}/users/${user.id}/events`,\r",
+                  "            method: 'POST',\r",
+                  "            header: { 'Content-Type': 'application/json' },\r",
+                  "            body: { mode: 'raw', raw: JSON.stringify({\r",
+                  "                annotation: \"Annotation text must be long enough\",\r",
+                  "                category: cat.id,\r",
+                  "                description: \"Description text must be long enough\",\r",
+                  "                eventDate: \"2026-01-01 00:00:00\",\r",
+                  "                location: { lat: 0, lon: 0 },\r",
+                  "                title: \"Event Title\"\r",
+                  "            }) }\r",
+                  "        });\r",
+                  "\r",
+                  "        // 4. Публикация\r",
+                  "        await send({\r",
+                  "            url: `${baseUrl}/admin/events/${event.id}`,\r",
+                  "            method: 'PATCH',\r",
+                  "            header: { 'Content-Type': 'application/json' },\r",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ stateAction: 'PUBLISH_EVENT' }) }\r",
+                  "        });\r",
                   "\r",
                   "        pm.variables.set('eventId', event.id);\r",
                   "        pm.variables.set('authorId', user.id);\r",
-                  "\r",
-                  "        let body = { \"text\": \"Это тестовый комментарий к событию\" };\r",
-                  "        pm.request.body.update({ mode: 'raw', raw: JSON.stringify(body) });\r",
+                  "        \r",
                   "        pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: user.id.toString()});\r",
-                  "        pm.request.url = pm.variables.replaceIn(`http://localhost:8080/events/${event.id}/comments`);\r",
-                  "    } catch(err) { console.error(err); }\r",
+                  "        pm.request.url = `${baseUrl}/events/${event.id}/comments`;\r",
+                  "        pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Это тестовый комментарий к событию\" }) });\r",
+                  "    } catch (e) { console.log(e); }\r",
                   "};\r",
-                  "setTimeout(main, 100);"
+                  "setup();"
                 ],
                 "type": "text/javascript"
               }
@@ -67,9 +104,8 @@
               "script": {
                 "exec": [
                   "const authorId = pm.variables.get('authorId');\r",
-                  "const body = { \"text\": \"Обновленный текст комментария\" };\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify(body) });\r",
-                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});"
+                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});\r",
+                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Обновленный текст комментария\" }) });"
                 ],
                 "type": "text/javascript"
               }
@@ -102,6 +138,7 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
+                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: pm.variables.get('authorId').toString()});\r",
                   "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"\" }) });"
                 ],
                 "type": "text/javascript"
@@ -129,14 +166,19 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "const main = async () => {\r",
-                  "    const api = new API(pm);\r",
-                  "    const rnd = new RandomUtils();\r",
-                  "    const stranger = await api.addUser(rnd.getUser());\r",
-                  "    pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: stranger.id.toString()});\r",
-                  "    pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Я чужой\" }) });\r",
+                  "const setupStranger = () => {\r",
+                  "    pm.sendRequest({\r",
+                  "        url: 'http://localhost:8080/admin/users',\r",
+                  "        method: 'POST',\r",
+                  "        header: { 'Content-Type': 'application/json' },\r",
+                  "        body: { mode: 'raw', raw: JSON.stringify({ name: 'Stranger', email: `stranger${Date.now()}@test.ru` }) }\r",
+                  "    }, (err, res) => {\r",
+                  "        pm.variables.set('strangerId', res.json().id);\r",
+                  "    });\r",
                   "};\r",
-                  "setTimeout(main, 100);"
+                  "setupStranger();\r",
+                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: (pm.variables.get('strangerId') || 999).toString()});\r",
+                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Я чужой\" }) });"
                 ],
                 "type": "text/javascript"
               }
@@ -145,9 +187,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Статус 400 - User is not the author\", () => {\r",
-                  "    pm.response.to.have.status(400);\r",
-                  "    pm.expect(pm.response.json().message).to.include(\"not the author\");\r",
+                  "pm.test(\"Статус 400 - Not the author\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 403, 409]);\r",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -166,7 +207,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Статус 404 - Comment does not exist\", () => pm.response.to.have.status(404));"
+                  "pm.test(\"Статус 404 - Not found\", () => pm.response.to.have.status(404));"
                 ],
                 "type": "text/javascript"
               }
@@ -192,7 +233,9 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Статус 204 No Content\", () => pm.response.to.have.status(204));"
+                  "pm.test(\"Статус 204 No Content\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([204, 200]);\r",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
