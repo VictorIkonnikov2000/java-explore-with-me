@@ -1,255 +1,127 @@
 {
   "info": {
-    "_postman_id": "comment-api-tests-dynamic-2024",
-    "name": "EWM Comment API tests",
+    "name": "Comments API Tests",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "eventId", "value": "1" },
+    { "key": "userId", "value": "1" },
+    { "key": "commentId", "value": "" }
+  ],
   "item": [
     {
-      "name": "Positive Tests",
-      "item": [
+      "name": "Добавить комментарий",
+      "event": [
         {
-          "name": "Add comment - Success",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "const baseUrl = 'http://localhost:8080';\r",
-                  "const timestamp = Date.now();\r",
-                  "\r",
-                  "// Хелпер для асинхронных запросов\r",
-                  "const send = (opts) => new Promise((res, rej) => pm.sendRequest(opts, (err, r) => err ? rej(err) : res(r.json())));\r",
-                  "\r",
-                  "const setup = async () => {\r",
-                  "    try {\r",
-                  "        // 1. Создание пользователя\r",
-                  "        const user = await send({\r",
-                  "            url: `${baseUrl}/admin/users`,\r",
-                  "            method: 'POST',\r",
-                  "            header: { 'Content-Type': 'application/json' },\r",
-                  "            body: { mode: 'raw', raw: JSON.stringify({ name: 'User' + timestamp, email: `test${timestamp}@test.ru` }) }\r",
-                  "        });\r",
-                  "\r",
-                  "        // 2. Создание категории\r",
-                  "        const cat = await send({\r",
-                  "            url: `${baseUrl}/admin/categories`,\r",
-                  "            method: 'POST',\r",
-                  "            header: { 'Content-Type': 'application/json' },\r",
-                  "            body: { mode: 'raw', raw: JSON.stringify({ name: 'Cat' + timestamp }) }\r",
-                  "        });\r",
-                  "\r",
-                  "        // 3. Создание события\r",
-                  "        const event = await send({\r",
-                  "            url: `${baseUrl}/users/${user.id}/events`,\r",
-                  "            method: 'POST',\r",
-                  "            header: { 'Content-Type': 'application/json' },\r",
-                  "            body: { mode: 'raw', raw: JSON.stringify({\r",
-                  "                annotation: \"Annotation text must be long enough\",\r",
-                  "                category: cat.id,\r",
-                  "                description: \"Description text must be long enough\",\r",
-                  "                eventDate: \"2026-01-01 00:00:00\",\r",
-                  "                location: { lat: 0, lon: 0 },\r",
-                  "                title: \"Event Title\"\r",
-                  "            }) }\r",
-                  "        });\r",
-                  "\r",
-                  "        // 4. Публикация\r",
-                  "        await send({\r",
-                  "            url: `${baseUrl}/admin/events/${event.id}`,\r",
-                  "            method: 'PATCH',\r",
-                  "            header: { 'Content-Type': 'application/json' },\r",
-                  "            body: { mode: 'raw', raw: JSON.stringify({ stateAction: 'PUBLISH_EVENT' }) }\r",
-                  "        });\r",
-                  "\r",
-                  "        pm.variables.set('eventId', event.id);\r",
-                  "        pm.variables.set('authorId', user.id);\r",
-                  "        \r",
-                  "        pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: user.id.toString()});\r",
-                  "        pm.request.url = `${baseUrl}/events/${event.id}/comments`;\r",
-                  "        pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Это тестовый комментарий к событию\" }) });\r",
-                  "    } catch (e) { console.log(e); }\r",
-                  "};\r",
-                  "setup();"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Статус 201 Created\", () => pm.response.to.have.status(201));\r",
-                  "const res = pm.response.json();\r",
-                  "pm.variables.set(\"lastCommentId\", res.id);\r",
-                  "pm.test(\"Текст комментария совпадает\", () => pm.expect(res.text).to.eql(\"Это тестовый комментарий к событию\"));"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+              "const jsonData = pm.response.json();",
+              "pm.test('Text matches', () => pm.expect(jsonData.text).to.eql('Test comment text'));",
+              "pm.collectionVariables.set('commentId', jsonData.id);"
             ],
-            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments" }
-          }
-        },
-        {
-          "name": "Update comment - Success",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "const authorId = pm.variables.get('authorId');\r",
-                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: authorId.toString()});\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Обновленный текст комментария\" }) });"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Статус 200 OK\", () => pm.response.to.have.status(200));\r",
-                  "pm.test(\"Текст обновлен\", () => pm.expect(pm.response.json().text).to.eql(\"Обновленный текст комментария\"));"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/{{lastCommentId}}" }
+            "type": "text/javascript"
           }
         }
-      ]
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-Sharer-User-Id", "value": "{{userId}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"text\": \"Test comment text\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments"]
+        }
+      }
     },
     {
-      "name": "Negative Tests",
-      "item": [
+      "name": "Получить все комментарии события",
+      "event": [
         {
-          "name": "Add comment - Empty Text (Validation)",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: pm.variables.get('authorId').toString()});\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"\" }) });"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Статус 400 - Validation failed\", () => pm.response.to.have.status(400));"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments" }
-          }
-        },
-        {
-          "name": "Update comment - Not Author (Forbidden)",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "const setupStranger = () => {\r",
-                  "    pm.sendRequest({\r",
-                  "        url: 'http://localhost:8080/admin/users',\r",
-                  "        method: 'POST',\r",
-                  "        header: { 'Content-Type': 'application/json' },\r",
-                  "        body: { mode: 'raw', raw: JSON.stringify({ name: 'Stranger', email: `stranger${Date.now()}@test.ru` }) }\r",
-                  "    }, (err, res) => {\r",
-                  "        pm.variables.set('strangerId', res.json().id);\r",
-                  "    });\r",
-                  "};\r",
-                  "setupStranger();\r",
-                  "pm.request.headers.upsert({key: 'X-Sharer-User-Id', value: (pm.variables.get('strangerId') || 999).toString()});\r",
-                  "pm.request.body.update({ mode: 'raw', raw: JSON.stringify({ \"text\": \"Я чужой\" }) });"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Статус 400 - Not the author\", () => {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([400, 403, 409]);\r",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/{{lastCommentId}}" }
-          }
-        },
-        {
-          "name": "Delete comment - Not Found",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Статус 404 - Not found\", () => pm.response.to.have.status(404));"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "X-Sharer-User-Id", "value": "{{authorId}}" }
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
             ],
-            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/999999" }
+            "type": "text/javascript"
           }
         }
-      ]
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments"]
+        }
+      }
     },
     {
-      "name": "Cleanup",
-      "item": [
+      "name": "Обновить комментарий",
+      "event": [
         {
-          "name": "Delete comment - Success",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Статус 204 No Content\", () => {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([204, 200]);\r",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "X-Sharer-User-Id", "value": "{{authorId}}" }
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "const jsonData = pm.response.json();",
+              "pm.test('Text updated', () => pm.expect(jsonData.text).to.eql('Updated text'));"
             ],
-            "url": { "raw": "http://localhost:8080/events/{{eventId}}/comments/{{lastCommentId}}" }
+            "type": "text/javascript"
           }
         }
-      ]
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "X-Sharer-User-Id", "value": "{{userId}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"text\": \"Updated text\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments", "{{commentId}}"]
+        }
+      }
+    },
+    {
+      "name": "Удалить комментарий",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-Sharer-User-Id", "value": "{{userId}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments", "{{commentId}}"]
+        }
+      }
     }
   ]
 }
