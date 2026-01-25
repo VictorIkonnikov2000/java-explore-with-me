@@ -1,0 +1,127 @@
+{
+  "info": {
+    "name": "Comments API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "eventId", "value": "1" },
+    { "key": "userId", "value": "1" },
+    { "key": "commentId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Добавить комментарий",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+              "const jsonData = pm.response.json();",
+              "pm.test('Text matches', () => pm.expect(jsonData.text).to.eql('Test comment text'));",
+              "pm.collectionVariables.set('commentId', jsonData.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-Sharer-User-Id", "value": "{{userId}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"text\": \"Test comment text\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments"]
+        }
+      }
+    },
+    {
+      "name": "Получить все комментарии события",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments"]
+        }
+      }
+    },
+    {
+      "name": "Обновить комментарий",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "const jsonData = pm.response.json();",
+              "pm.test('Text updated', () => pm.expect(jsonData.text).to.eql('Updated text'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "X-Sharer-User-Id", "value": "{{userId}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"text\": \"Updated text\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments", "{{commentId}}"]
+        }
+      }
+    },
+    {
+      "name": "Удалить комментарий",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-Sharer-User-Id", "value": "{{userId}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/events/{{eventId}}/comments/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "{{eventId}}", "comments", "{{commentId}}"]
+        }
+      }
+    }
+  ]
+}

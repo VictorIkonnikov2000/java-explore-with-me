@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.model.Category;
 import ru.practicum.client.StatsClient;
+import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.service.CommentService;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.exception.BadRequestException;
@@ -42,6 +44,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final StatsClient statsClient;
+    private final CommentService commentService;
 
     private static final String EVENT = "/events/";
 
@@ -232,6 +235,7 @@ public class EventService {
         return eventFullDtoList;
     }
 
+
     private void sendHit(HttpServletRequest request, String uri) {
         EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("ewm-main-service")
@@ -316,5 +320,26 @@ public class EventService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    // Метод добавления комментария через делегацию
+    @Transactional
+    public CommentDto addComment(Long eventId, Long userId, String text) {
+        log.info("Добавление комментария к событию id={} пользователем id={}", eventId, userId);
+        return commentService.addComment(eventId, userId, text);
+    }
+
+    // Метод удаления комментария через делегацию
+    @Transactional
+    public void deleteComment(Long commentId, Long userId) {
+        log.info("Удаление комментария id={} пользователем id={}", commentId, userId);
+        commentService.deleteComment(commentId, userId);
+    }
+
+    // Метод обновления комментария через делегацию
+    @Transactional
+    public CommentDto updateComment(Long commentId, Long userId, String text) {
+        log.info("Обновление комментария id={} пользователем id={}", commentId, userId);
+        return commentService.updateComment(commentId, userId, text);
     }
 }

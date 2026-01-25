@@ -66,6 +66,7 @@ public class Event {
     @Column(name = "title", nullable = false, length = 120)
     private String title;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
